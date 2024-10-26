@@ -1,0 +1,42 @@
+syntax = "proto3";
+package studyvault;
+
+service PostsService {
+    rpc GetPostsByChannelId (Channel) returns (Posts);
+    rpc UploadPost (stream FileChunk) returns (UploadStatus);
+  //  rpc DownloadFile (UploadStatus) returns (stream FileData);
+}
+
+message Channel {
+    uint32 channel_id = 1;
+}
+
+message Posts {
+    message PostInfo {
+        uint32 post_id = 1;
+        uint32 channel_id = 2;
+        string file_id = 3;
+        string title = 4;
+        string description = 5;
+        string publish_date = 6;
+    }
+    repeated PostInfo posts = 7;
+}
+
+message FileChunk {
+    bytes content = 1;
+    string filename = 2;
+    uint32 channel_id = 3;
+    string title = 4;
+    string description = 5;
+}
+
+//message FileData {
+  //  bytes content = 1;
+    //string filename = 2;
+//}
+
+message UploadStatus {
+    bool success = 1;
+    string message = 2;
+}
