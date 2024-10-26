@@ -3,24 +3,28 @@ services:
     build:
       context: .
       dockerfile: channels/Dockerfile
+    image: service-channels:latest
     ports:
       - "8080:8080"
   posts:
     build:
       context: .
       dockerfile: posts/Dockerfile
+    image: service-posts:latest
     ports:
       - "8081:8081"
   subscriptions:
     build:
       context: .
       dockerfile: subscriptions/Dockerfile
+    image: service-subscriptions:latest
     ports:
       - "8082:8082"
   users:
     build:
       context: .
       dockerfile: users/Dockerfile
+    image: service-users:latest
     ports:
       - "8083:8083"
   mysql:
