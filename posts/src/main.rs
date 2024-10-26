@@ -12,7 +12,7 @@ pub mod posts {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "0.0.0.0:50051".parse()?;
+    let addr = "0.0.0.0:8081".parse()?;
     let file_service = PostsServicesStruct::default();
     println!("gRPC Server listening on {}", addr);
     Server::builder()

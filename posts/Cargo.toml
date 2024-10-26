@@ -3,10 +3,6 @@ name = "posts"
 version = "0.1.0"
 edition = "2021"
 
-[[bin]]
-name = "studyvault-server"
-path = "src/server.rs"
-
 [dependencies]
 data_access = { path = "../data_access" }
 actix-web = { workspace = true }
