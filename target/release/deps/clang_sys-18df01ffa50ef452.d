@@ -1,0 +1,14 @@
+/home/camilo/Documents/studyvault_services/target/release/deps/libclang_sys-18df01ffa50ef452.rmeta: /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/lib.rs /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/support.rs /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/link.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/macros.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/common.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/dynamic.rs
+
+/home/camilo/Documents/studyvault_services/target/release/deps/libclang_sys-18df01ffa50ef452.rlib: /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/lib.rs /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/support.rs /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/link.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/macros.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/common.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/dynamic.rs
+
+/home/camilo/Documents/studyvault_services/target/release/deps/clang_sys-18df01ffa50ef452.d: /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/lib.rs /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/support.rs /home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/link.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/macros.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/common.rs /home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/dynamic.rs
+
+/home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/lib.rs:
+/home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/support.rs:
+/home/camilo/.cargo/registry/src/index.crates.io-6f17d22bba15001f/clang-sys-1.8.1/src/link.rs:
+/home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/macros.rs:
+/home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/common.rs:
+/home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out/dynamic.rs:
+
+# env-dep:OUT_DIR=/home/camilo/Documents/studyvault_services/target/release/build/clang-sys-32172ba2a1240126/out
