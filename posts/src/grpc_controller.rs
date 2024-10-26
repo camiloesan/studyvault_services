@@ -1,3 +1,4 @@
+use crate::posts::posts::PostInfo;
 use crate::posts::posts_service_server::PostsService;
 use crate::posts::Channel;
 use crate::posts::Posts;
@@ -83,10 +84,8 @@ impl PostsService for PostsServicesStruct {
     ) -> Result<Response<Posts>, Status> {
         let channel_id = request.into_inner().channel_id;
 
-        // Fetch posts from the database using sql_operations
         let db_posts = sql_operations::get_posts_by_channel_id(channel_id).await;
 
-        // Convert database posts into the proto Posts format
         let post_infos: Vec<PostInfo> = db_posts
             .into_iter()
             .map(|post| PostInfo {
@@ -99,9 +98,8 @@ impl PostsService for PostsServicesStruct {
             })
             .collect();
 
-        // Create the response
         let response = Posts { posts: post_infos };
 
-        Ok(Response::new(None))
+        Ok(Response::new(response))
     }
 }

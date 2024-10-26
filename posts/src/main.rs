@@ -1,26 +1,23 @@
-mod controller;
+mod grpc_controller;
 mod post;
 mod sql_operations;
 
-use actix_cors::Cors;
-use actix_web::{web, App, HttpServer};
+use grpc_controller::PostsServicesStruct;
+use posts::posts_service_server::PostsServiceServer;
+use tonic::transport::Server;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    HttpServer::new(move || {
-        let cors = Cors::default()
-            .allow_any_origin()
-            .allow_any_method()
-            .allow_any_header();
+pub mod posts {
+    tonic::include_proto!("studyvault");
+}
 
-        App::new()
-            .route(
-                "/posts/channel/{id}",
-                web::get().to(controller::get_posts_by_channel),
-            )
-            .wrap(cors)
-    })
-    .bind("0.0.0.0:8081")?
-    .run()
-    .await
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let addr = "0.0.0.0:50051".parse()?;
+    let file_service = PostsServicesStruct::default();
+    println!("gRPC Server listening on {}", addr);
+    Server::builder()
+        .add_service(PostsServiceServer::new(file_service))
+        .serve(addr)
+        .await?;
+    Ok(())
 }

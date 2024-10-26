@@ -96,7 +96,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_posts_by_channel() {
-        let posts = get_posts_by_channel(1).await;
+        let posts = get_posts_by_channel_id(1).await;
         assert_eq!(posts.len(), 2);
     }
 
