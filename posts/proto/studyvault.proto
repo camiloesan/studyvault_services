@@ -2,16 +2,16 @@ syntax = "proto3";
 package studyvault;
 
 service PostsService {
-    rpc GetPostsByChannelId (Channel) returns (Posts);
-    rpc UploadPost (stream FileChunk) returns (UploadStatus);
+    rpc GetPostsByChannelId (ChannelRequest) returns (PostsResponse);
+    rpc UploadPost (stream FileChunk) returns (UploadStatusResponse);
   //  rpc DownloadFile (UploadStatus) returns (stream FileData);
 }
 
-message Channel {
+message ChannelRequest {
     uint32 channel_id = 1;
 }
 
-message Posts {
+message PostsResponse {
     message PostInfo {
         uint32 post_id = 1;
         uint32 channel_id = 2;
@@ -36,7 +36,7 @@ message FileChunk {
     //string filename = 2;
 //}
 
-message UploadStatus {
+message UploadStatusResponse {
     bool success = 1;
     string message = 2;
 }
