@@ -19,41 +19,48 @@ impl PostsService for PostsServicesStruct {
     ) -> Result<Response<UploadStatusResponse>, Status> {
         println!("upload requested");
         let mut stream = request.into_inner();
-        let mut file = None;
-        let mut file_name: Option<String> = None;
-        let mut channel_id: Option<u32> = None;
-        let mut title: Option<String> = None;
-        let mut description: Option<String> = None;
         let uuid: String = Uuid::new_v4().to_string();
+        let mut sql_result = false;
 
         while let Some(file_chunk) = stream.message().await? {
-            if file_name.is_none() {
-                channel_id = Some(file_chunk.channel_id);
-                file_name = Some(file_chunk.filename);
-                tokio::fs::create_dir_all(format!(
-                    "/data/files/{}",
-                    &channel_id.unwrap().to_string()
-                ))
+            let channel_id = Some(file_chunk.channel_id);
+            let file_name = Some(file_chunk.filename);
+            let title = Some(file_chunk.title);
+            let description = Some(file_chunk.description);
+
+            sql_result = sql_operations::create_post(
+                uuid.clone(),
+                channel_id.unwrap(),
+                file_name.clone().unwrap(),
+                title.unwrap(),
+                description.unwrap(),
+            )
+            .await;
+
+            if !sql_result {
+                return Ok(Response::new(UploadStatusResponse {
+                    success: false,
+                    message: format!("Failed to upload file"),
+                }));
+            }
+
+            tokio::fs::create_dir_all(format!("/data/files/{}", &channel_id.unwrap().to_string()))
                 .await
                 .map_err(|e| {
                     eprintln!("Failed to create directory: {:?}", e);
                     Status::internal("Failed to create directory")
                 })?;
 
-                let extension = file_name.as_ref().unwrap().split('.').last().unwrap();
-                let file_path = format!(
-                    "/data/files/{}/{}",
-                    channel_id.unwrap().to_string(),
-                    format!("{}.{}", &uuid, extension)
-                );
-                file = Some(tokio::fs::File::create(file_path).await.map_err(|e| {
-                    eprintln!("Failed to create file: {:?}", e);
-                    Status::internal("Failed to create file")
-                })?);
-            }
-
-            title = Some(file_chunk.title);
-            description = Some(file_chunk.description);
+            let extension = file_name.as_ref().unwrap().split('.').last().unwrap();
+            let file_path = format!(
+                "/data/files/{}/{}",
+                channel_id.unwrap().to_string(),
+                format!("{}.{}", &uuid, extension)
+            );
+            let mut file = Some(tokio::fs::File::create(file_path).await.map_err(|e| {
+                eprintln!("Failed to create file: {:?}", e);
+                Status::internal("Failed to create file")
+            })?);
 
             if let Some(ref mut f) = file {
                 f.write_all(&file_chunk.content).await.map_err(|e| {
@@ -63,17 +70,8 @@ impl PostsService for PostsServicesStruct {
             }
         }
 
-        let result = sql_operations::create_post(
-            uuid,
-            channel_id.unwrap(),
-            file_name.unwrap(),
-            title.unwrap(),
-            description.unwrap(),
-        )
-        .await;
-
         Ok(Response::new(UploadStatusResponse {
-            success: result,
+            success: sql_result,
             message: format!("File uploaded successfully"),
         }))
     }
