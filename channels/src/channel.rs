@@ -7,3 +7,10 @@ pub struct Channel {
     pub description: String,
     pub category_id: u32,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct ChannelUpdateData {
+    pub name: String,
+    pub description: String,
+    pub category_id: u32,
+}

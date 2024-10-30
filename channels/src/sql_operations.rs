@@ -10,13 +10,15 @@ pub struct Channel {
     creator_last_name: String,
     name: String,
     description: String,
+    category_name: String,
 }
 
 pub async fn get_all_channels() -> Vec<Channel> {
     let mut conn = data_access::get_connection();
     let query =
-        "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name
-        FROM channels INNER JOIN users ON channels.creator_id = users.user_id";
+        "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
+        FROM channels INNER JOIN users ON channels.creator_id = users.user_id
+        INNER JOIN categories ON channels.category_id = categories.category_id";
     let mut channels: Vec<Channel> = Vec::new();
     conn.query_map(&query, |mut row: Row| {
         let channel = Channel {
@@ -26,6 +28,7 @@ pub async fn get_all_channels() -> Vec<Channel> {
             creator_last_name: row.take("creator_last_name").unwrap(),
             name: row.take("name").unwrap(),
             description: row.take("description").unwrap(),
+            category_name: row.take("category_name").unwrap(),
         };
         channels.push(channel);
     })
@@ -37,9 +40,10 @@ pub async fn get_all_channels() -> Vec<Channel> {
 pub async fn get_subscriptions_by_user(user_id: u32) -> Vec<Channel> {
     let mut conn = data_access::get_connection();
     let query =
-        "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name
-    FROM channels INNER JOIN users ON channels.creator_id = users.user_id
-    WHERE channel_id IN (SELECT channel_id FROM subscriptions WHERE user_id = :user_id)";
+        "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
+        FROM channels INNER JOIN users ON channels.creator_id = users.user_id
+        INNER JOIN categories ON channels.category_id = categories.category_id
+        WHERE channels.channel_id IN (SELECT channel_id FROM subscriptions WHERE user_id = :user_id)";
     let mut channels: Vec<Channel> = Vec::new();
 
     conn.exec_map(&query, params! { "user_id" => user_id }, |mut row: Row| {
@@ -50,6 +54,7 @@ pub async fn get_subscriptions_by_user(user_id: u32) -> Vec<Channel> {
             creator_last_name: row.take("creator_last_name").unwrap(),
             name: row.take("name").unwrap(),
             description: row.take("description").unwrap(),
+            category_name: row.take("category_name").unwrap(),
         };
         channels.push(channel);
     })
@@ -60,8 +65,11 @@ pub async fn get_subscriptions_by_user(user_id: u32) -> Vec<Channel> {
 
 pub async fn get_channels_created_by_user(user_id: u32) -> Vec<Channel> {
     let mut conn = data_access::get_connection();
-    let query = "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name
-    FROM channels INNER JOIN users ON channels.creator_id = users.user_id WHERE creator_id = :creator_id";
+    let query = 
+        "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
+        FROM channels INNER JOIN users ON channels.creator_id = users.user_id
+        INNER JOIN categories ON channels.category_id = categories.category_id
+        WHERE channels.creator_id = :creator_id";
     let mut channels: Vec<Channel> = Vec::new();
 
     conn.exec_map(
@@ -75,6 +83,7 @@ pub async fn get_channels_created_by_user(user_id: u32) -> Vec<Channel> {
                 creator_last_name: row.take("creator_last_name").unwrap(),
                 name: row.take("name").unwrap(),
                 description: row.take("description").unwrap(),
+                category_name: row.take("category_name").unwrap(),
             };
             channels.push(channel);
         },
@@ -107,7 +116,33 @@ pub async fn create_channel(
         .expect("Failed to create channel")
         .affected_rows();
 
-    result == 1 // Si se insertó correctamente, afectará una fila
+    result == 1
+}
+
+pub async fn update_channel(
+    channel_id: u32,
+    name: String,
+    description: String,
+    category_id: u32,
+) -> bool {
+    let mut conn = data_access::get_connection();
+    let query = "UPDATE channels SET name = :name, description = :description, category_id = :category_id 
+        WHERE channel_id = :channel_id";
+
+    let result = conn
+        .exec_iter(
+            query,
+            params! {
+                "name" => name,
+                "description" => description,
+                "category_id" => category_id,
+                "channel_id" => channel_id,
+            },
+        )
+        .expect("Failed to update channel")
+        .affected_rows();
+
+    result == 1
 }
 
 #[derive(Serialize, Deserialize)]
