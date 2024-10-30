@@ -62,6 +62,7 @@ create table comments(
     user_id int not null,
     comment varchar(256) not null,
     publish_date date not null,
+    rating int not null check (rating between 0 and 5),
     primary key(comment_id),
     unique(comment_id)
 );
