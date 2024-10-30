@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = ["data_access", "channels", "posts", "subscriptions", "users", "auth"]
+members = ["data_access", "channels", "comments", "posts", "subscriptions", "users", "auth"]
 
 [workspace.dependencies]
 actix-web = "4.0"

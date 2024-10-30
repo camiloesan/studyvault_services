@@ -9,6 +9,7 @@ WORKDIR /usr/src/studyvault_services
 COPY Cargo.toml Cargo.lock ./
 COPY auth/Cargo.toml auth/
 COPY channels/Cargo.toml channels/
+COPY comments/Cargo.toml comments/
 COPY data_access/Cargo.toml data_access/
 COPY posts/Cargo.toml posts/
 COPY subscriptions/Cargo.toml subscriptions/

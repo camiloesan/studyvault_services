@@ -1,6 +1,6 @@
 FROM rust:latest AS builder
 
-EXPOSE 8081
+EXPOSE 8084
 
 RUN apt-get update && apt-get install -y protobuf-compiler libprotobuf-dev openssl libssl-dev
 
@@ -17,10 +17,10 @@ COPY users/Cargo.toml users/
 
 COPY . .
 
-RUN cargo build -p posts --release
+RUN cargo build -p comments --release
 
 FROM ubuntu:22.04
 
-COPY --from=builder /usr/src/studyvault_services/target/release/posts /usr/local/bin/posts
+COPY --from=builder /usr/src/studyvault_services/target/release/comments /usr/local/bin/comments
 
-CMD ["posts"]
+CMD ["comments"]
