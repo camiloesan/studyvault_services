@@ -1,4 +1,4 @@
-use crate::user::RegisterRequest;
+use crate::user::{RegisterRequest, UserToUpdate};
 use data_access;
 use mysql::{params, prelude::Queryable, Row};
 use serde::{Deserialize, Serialize};
@@ -85,4 +85,24 @@ pub async fn get_all_user_emails() -> Vec<String> {
     .expect("failed to get user emails");
 
     emails
+}
+
+pub async fn update_user(request: UserToUpdate) -> bool {
+    let mut conn = data_access::get_connection();
+
+    let query = "UPDATE users SET name = :name, last_name = :last_name WHERE user_id = :user_id";
+
+    let result = conn
+        .exec_iter(
+            query,
+            params! {
+            "user_id" => request.id,
+            "name" => request.name,
+            "last_name" => request.last_name,
+            },
+        )
+        .expect("Failed to execute register query")
+        .affected_rows();
+
+    result == 1
 }
