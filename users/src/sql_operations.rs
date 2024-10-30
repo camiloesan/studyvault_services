@@ -106,3 +106,21 @@ pub async fn update_user(request: UserToUpdate) -> bool {
 
     result == 1
 }
+
+pub async fn delete_user(id: u32) -> bool {
+    let mut conn = data_access::get_connection();
+
+    let query = "DELETE FROM users WHERE user_id = :user_id";
+
+    let result = conn
+        .exec_iter(
+            query,
+            params! {
+            "user_id" => id
+            },
+        )
+        .expect("Failed to execute register query")
+        .affected_rows();
+
+    result == 1
+}

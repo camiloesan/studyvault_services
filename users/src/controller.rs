@@ -40,3 +40,13 @@ pub async fn update_existing_user(data: web::Json<UserToUpdate>) -> impl Respond
 
     HttpResponse::Ok()
 }
+
+pub async fn delete_existing_user(data: web::Json<u32>) -> impl Responder {
+    let request = sql_operations::delete_user(data.into_inner()).await;
+
+    if !request {
+        return HttpResponse::InternalServerError();
+    }
+
+    HttpResponse::Ok()
+}
