@@ -47,6 +47,17 @@ pub async fn update_channel(channel_id: web::Path<u32>, channel_data: web::Json<
     HttpResponse::Ok() // 200
 }
 
+pub async fn delete_channel(channel_id: web::Path<u32>) -> impl Responder {
+    let id = *channel_id;
+
+    let result = sql_operations::delete_channel(id).await;
+
+    if !result {
+        return HttpResponse::NotFound() //404
+    }
+
+    HttpResponse::Ok() //200
+}
 
 pub async fn get_all_categories() -> impl Responder {
     let categories = sql_operations::get_all_categories().await;

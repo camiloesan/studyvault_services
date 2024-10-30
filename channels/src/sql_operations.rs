@@ -145,6 +145,24 @@ pub async fn update_channel(
     result == 1
 }
 
+pub async fn delete_channel(channel_id: u32) -> bool {
+    let mut conn = data_access::get_connection();
+
+    let query = "DELETE FROM channels WHERE channel_id = :channel_id";
+
+    let result = conn
+        .exec_iter(
+            query,
+            params! {
+                "channel_id" => channel_id
+            },
+        )
+        .expect("Failed to execute delete channel query")
+        .affected_rows();
+
+    result == 1
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct Category {
     category_id: u32,

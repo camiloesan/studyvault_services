@@ -35,6 +35,10 @@ async fn main() -> std::io::Result<()> {
                 "/channel/update/{id}",
                 web::put().to(controller::update_channel),
             )
+            .route(
+                "/channel/delete/{id}", 
+                web::delete().to(controller::delete_channel),
+            )
             .wrap(cors)
     })
     .bind("0.0.0.0:8080")?
