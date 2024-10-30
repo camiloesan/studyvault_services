@@ -13,3 +13,10 @@ pub struct RegisterRequest {
     pub last_name: String,
     pub password: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct UserToUpdate {
+    pub id: u32,
+    pub name: String,
+    pub last_name: String
+}
