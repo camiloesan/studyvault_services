@@ -12,3 +12,10 @@ serde_json = { workspace = true }
 mysql = { workspace = true }
 tokio = { workspace = true }
 chrono = { workspace = true }
+uuid = { version = "1.4", features = ["v4"] }
+async-stream = "0.3"
+tonic = "0.10"
+prost = "0.12"
+
+[build-dependencies]
+tonic-build = "0.10"
