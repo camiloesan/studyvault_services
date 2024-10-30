@@ -12,4 +12,7 @@ docker build -f subscriptions/Dockerfile -t service-subscriptions:latest .
 echo "Building users service..."
 docker build -f users/Dockerfile -t service-users:latest .
 
+echo "Building auth service..."
+docker build -f auth/Dockerfile -t service-auth:latest .
+
 echo "All builds completed"

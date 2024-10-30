@@ -43,6 +43,13 @@ services:
     image: service-comments:latest
     ports:
       - "8084:8084"
+  auth:
+    build:
+      context: .
+      dockerfile: auth/Dockerfile
+    image: service-auth:latest
+    ports:
+      - "8085:8085"
   mysql:
     build:
       context: ./database

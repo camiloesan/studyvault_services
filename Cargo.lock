@@ -332,6 +332,16 @@ dependencies = [
 [[package]]
 name = "auth"
 version = "0.1.0"
+dependencies = [
+ "actix-cors",
+ "actix-web",
+ "chrono",
+ "data_access",
+ "mysql",
+ "serde",
+ "serde_json",
+ "tokio",
+]
 
 [[package]]
 name = "autocfg"
