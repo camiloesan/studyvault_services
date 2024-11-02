@@ -1,11 +1,11 @@
-use crate::comment::Comment;
+use crate::comment::{CommentToInsert, Comment};
 use data_access;
 use mysql::{params, prelude::Queryable, Row, Value};
 
-pub async fn comment(request: Comment) -> bool {
+pub async fn comment(request: CommentToInsert) -> bool {
     let mut conn = data_access::get_connection();
 
-    let query = "INSERT INTO comments (post_id, user_id, comment, publish_date, rating) VALUES (:post_id, :user_id, :comment, :publish_date, :rating)";
+    let query = "INSERT INTO comments (post_id, user_id, comment, publish_date, rating) VALUES (:post_id, :user_id, :comment, CURDATE(), :rating)";
 
     let result = conn
         .exec_iter(
@@ -14,7 +14,6 @@ pub async fn comment(request: Comment) -> bool {
             "post_id" => request.post_id,
             "user_id" => request.user_id,
             "comment" => request.comment,
-            "publish_date" => request.publish_date,
             "rating" => request.rating
             },
         )

@@ -36,3 +36,9 @@ pub async fn delete_existing_user(data: web::Json<u32>) -> impl Responder {
 
     HttpResponse::Ok()
 }
+
+pub async fn get_user_name_by_id(path: web::Path<u32>) -> impl Responder {
+    let user_id = path.into_inner();
+    let user_name = sql_operations::get_user_name(user_id).await;
+    HttpResponse::Ok().json(user_name)
+}

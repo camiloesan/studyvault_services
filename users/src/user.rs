@@ -14,3 +14,9 @@ pub struct UserToUpdate {
     pub name: String,
     pub last_name: String
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct UserName {
+    pub name: String,
+    pub last_name: String
+}

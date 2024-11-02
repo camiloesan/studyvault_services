@@ -63,3 +63,15 @@ pub async fn get_all_categories() -> impl Responder {
     let categories = sql_operations::get_all_categories().await;
     HttpResponse::Ok().json(categories)
 }
+
+pub async fn get_channel_name_by_id(path: web::Path<u32>) -> impl Responder {
+    let channel_id = path.into_inner();
+    let channel_name = sql_operations::get_channel_name(channel_id).await;
+    HttpResponse::Ok().json(channel_name)
+}
+
+pub async fn get_creator_id_by_channel_id(path: web::Path<u32>) -> impl Responder {
+    let channel_id = path.into_inner();
+    let creator_id = sql_operations::get_creator_id(channel_id).await;
+    HttpResponse::Ok().json(creator_id)
+}

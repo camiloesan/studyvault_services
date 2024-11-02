@@ -1,6 +1,6 @@
-use crate::user::{RegisterRequest, UserToUpdate};
+use crate::user::{RegisterRequest, UserName, UserToUpdate};
 use data_access;
-use mysql::{params, prelude::Queryable, Row};
+use mysql::{params, prelude::Queryable, Row, from_row};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -92,4 +92,26 @@ pub async fn delete_user(id: u32) -> bool {
         .affected_rows();
 
     result == 1
+}
+
+pub async fn get_user_name(user_id: u32) -> UserName {
+    let mut conn = data_access::get_connection();
+
+    let query = "SELECT name, last_name FROM users WHERE user_id = :user_id";
+
+    let result = conn
+        .exec_iter(query, params! {
+            "user_id" => user_id
+        })
+        .expect("Failed to execute query");
+
+    for row in result {
+        let (name, last_name): (String, String) = from_row::<(String, String)>(row.expect("Row error"));
+        return UserName { name, last_name };
+    }
+
+    UserName {
+        name: "Unknown".to_string(),
+        last_name: "User".to_string(),
+    }
 }

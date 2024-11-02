@@ -14,7 +14,7 @@ async fn main() -> std::io::Result<()> {
             .allow_any_header();
 
         App::new()
-            .route("/comment/all", web::get().to(controller::get_all_comments_by_post_id))
+            .route("/comment/all/{id}", web::get().to(controller::get_all_comments_by_post_id))
             .route("/comment", web::post().to(controller::comment_post))
             .wrap(cors)
     })

@@ -186,6 +186,41 @@ pub async fn get_all_categories() -> Vec<Category> {
     categories
 }
 
+pub async fn get_channel_name(channel_id: u32) -> String {
+    let mut conn = data_access::get_connection();
+
+    let query = "SELECT name FROM channels WHERE channel_id = :channel_id";
+
+    let result: Vec<String> = conn
+        .exec(
+            query,
+            params! {
+                "channel_id" => channel_id
+            },
+        )
+        .expect("Failed to execute query");
+
+    result.into_iter().next().unwrap_or_else(|| "Unknown Channel".to_string())
+}
+
+pub async fn get_creator_id(channel_id: u32) -> Option<u32> {
+    let mut conn = data_access::get_connection();
+
+    let query = "SELECT creator_id FROM channels WHERE channel_id = :channel_id";
+
+    let result: Vec<u32> = conn
+        .exec(
+            query,
+            params! {
+                "channel_id" => channel_id
+            },
+        )
+        .expect("Failed to execute query");
+
+    result.into_iter().next()
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
