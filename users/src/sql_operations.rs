@@ -1,4 +1,4 @@
-use crate::user::{RegisterRequest, UserName, UserToUpdate};
+use crate::user::{RegisterRequest, UserName, UserToUpdate, PasswordToUpdate};
 use data_access;
 use mysql::{params, prelude::Queryable, Row, from_row};
 use serde::{Deserialize, Serialize};
@@ -114,4 +114,23 @@ pub async fn get_user_name(user_id: u32) -> UserName {
         name: "Unknown".to_string(),
         last_name: "User".to_string(),
     }
+}
+
+pub async fn update_password(request: PasswordToUpdate) -> bool {
+    let mut conn = data_access::get_connection();
+
+    let query = "UPDATE users SET password = :password WHERE email = :email";
+
+    let result = conn
+        .exec_iter(
+            query,
+            params! {
+            "email" => request.email,
+            "password" => request.password
+            },
+        )
+        .expect("Failed to execute register query")
+        .affected_rows();
+
+    result == 1
 }

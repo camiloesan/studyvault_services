@@ -1,5 +1,5 @@
 use crate::sql_operations;
-use crate::user::{RegisterRequest, UserToUpdate, VerificationRequest};
+use crate::user::{RegisterRequest, UserToUpdate, VerificationRequest, PasswordToUpdate};
 use actix_web::{web, HttpResponse, Responder};
 use crate::email_operations::{generate_verification_code, send_verification_email};
 use crate::email_operations::VERIFICATION_CODES;
@@ -68,4 +68,14 @@ pub async fn verify_code(data: web::Json<VerificationRequest>) -> impl Responder
     }
 
     HttpResponse::Unauthorized().finish()
+}
+
+pub async fn update_user_password(data: web::Json<PasswordToUpdate>) -> impl Responder {
+    let request = sql_operations::update_password(data.into_inner()).await;
+
+    if !request {
+        return HttpResponse::InternalServerError();
+    }
+
+    HttpResponse::Ok()
 }

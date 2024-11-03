@@ -22,6 +22,7 @@ async fn main() -> std::io::Result<()> {
             .route("/user/name/{id}", web::get().to(controller::get_user_name_by_id))
             .route("/user/verification/request", web::post().to(controller::request_verification))
             .route("/user/verify", web::post().to(controller::verify_code))
+            .route("/password/update", web::put().to(controller::update_user_password))
             .wrap(cors)
     })
     .bind("0.0.0.0:8083")?

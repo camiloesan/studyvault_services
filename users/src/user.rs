@@ -26,3 +26,9 @@ pub struct VerificationRequest {
     pub email: String,
     pub code: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct PasswordToUpdate {
+    pub email: String,
+    pub password: String,
+}
