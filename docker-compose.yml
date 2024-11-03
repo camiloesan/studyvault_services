@@ -33,6 +33,8 @@ services:
     build:
       context: .
       dockerfile: users/Dockerfile
+    env_file:
+      - users/.env
     image: service-users:latest
     ports:
       - "8083:8083"

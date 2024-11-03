@@ -20,3 +20,9 @@ pub struct UserName {
     pub name: String,
     pub last_name: String
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct VerificationRequest {
+    pub email: String,
+    pub code: String,
+}

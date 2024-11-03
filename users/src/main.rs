@@ -1,6 +1,7 @@
 mod controller;
 mod sql_operations;
 mod user;
+mod email_operations;
 
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
@@ -19,6 +20,8 @@ async fn main() -> std::io::Result<()> {
             .route("/update/{id}", web::put().to(controller::update_existing_user))
             .route("/delete/{id}", web::delete().to(controller::delete_existing_user))
             .route("/user/name/{id}", web::get().to(controller::get_user_name_by_id))
+            .route("/user/verification/request", web::post().to(controller::request_verification))
+            .route("/user/verify", web::post().to(controller::verify_code))
             .wrap(cors)
     })
     .bind("0.0.0.0:8083")?
