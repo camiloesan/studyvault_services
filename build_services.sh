@@ -15,4 +15,7 @@ docker build -f users/Dockerfile -t service-users:latest .
 echo "Building auth service..."
 docker build -f auth/Dockerfile -t service-auth:latest .
 
+echo "Building comments service..."
+docker build -f comments/Dockerfile -t service-comments:latest .
+
 echo "All builds completed"
