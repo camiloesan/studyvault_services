@@ -33,8 +33,6 @@ services:
     build:
       context: .
       dockerfile: users/Dockerfile
-    env_file:
-      - users/.env
     image: service-users:latest
     ports:
       - "8083:8083"
@@ -49,6 +47,8 @@ services:
     build:
       context: .
       dockerfile: auth/Dockerfile
+    env_file:
+      - auth/.env
     image: service-auth:latest
     ports:
       - "8085:8085"
