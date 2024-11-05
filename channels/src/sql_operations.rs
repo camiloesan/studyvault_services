@@ -30,6 +30,8 @@ pub async fn get_all_channels() -> Vec<Channel> {
             description: row.take("description").unwrap(),
             category_name: row.take("category_name").unwrap(),
         };
+        println!("{}", channel.description.clone());
+
         channels.push(channel);
     })
     .expect("failed to get developer information");
@@ -65,7 +67,7 @@ pub async fn get_subscriptions_by_user(user_id: u32) -> Vec<Channel> {
 
 pub async fn get_channels_created_by_user(user_id: u32) -> Vec<Channel> {
     let mut conn = data_access::get_connection();
-    let query = 
+    let query =
         "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
         FROM channels INNER JOIN users ON channels.creator_id = users.user_id
         INNER JOIN categories ON channels.category_id = categories.category_id
@@ -126,7 +128,8 @@ pub async fn update_channel(
     category_id: u32,
 ) -> bool {
     let mut conn = data_access::get_connection();
-    let query = "UPDATE channels SET name = :name, description = :description, category_id = :category_id 
+    let query =
+        "UPDATE channels SET name = :name, description = :description, category_id = :category_id
         WHERE channel_id = :channel_id";
 
     let result = conn
@@ -200,7 +203,10 @@ pub async fn get_channel_name(channel_id: u32) -> String {
         )
         .expect("Failed to execute query");
 
-    result.into_iter().next().unwrap_or_else(|| "Unknown Channel".to_string())
+    result
+        .into_iter()
+        .next()
+        .unwrap_or_else(|| "Unknown Channel".to_string())
 }
 
 pub async fn get_creator_id(channel_id: u32) -> Option<u32> {
@@ -219,7 +225,6 @@ pub async fn get_creator_id(channel_id: u32) -> Option<u32> {
 
     result.into_iter().next()
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -54,8 +54,8 @@ services:
       - "8085:8085"
   mysql:
     build:
-      context: ./database
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: database/Dockerfile
     container_name: sv_mysql
     restart: always
     environment:
