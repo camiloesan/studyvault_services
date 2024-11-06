@@ -65,15 +65,15 @@ pub async fn get_subscriptions_by_user(user_id: u32) -> Vec<Channel> {
     channels
 }
 
-pub async fn get_channels_created_by_user(user_id: u32) -> Vec<Channel> {
+pub async fn get_channels_created_by_user(user_id: u32) -> Result<Vec<Channel>, mysql::Error> {
     let mut conn = data_access::get_connection();
     let query =
         "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
         FROM channels INNER JOIN users ON channels.creator_id = users.user_id
         INNER JOIN categories ON channels.category_id = categories.category_id
         WHERE channels.creator_id = :creator_id";
-    let mut channels: Vec<Channel> = Vec::new();
 
+    let mut channels: Vec<Channel> = Vec::new();
     conn.exec_map(
         &query,
         params! { "creator_id" => user_id },
@@ -89,10 +89,9 @@ pub async fn get_channels_created_by_user(user_id: u32) -> Vec<Channel> {
             };
             channels.push(channel);
         },
-    )
-    .expect("failed to get developer information");
+    )?;
 
-    channels
+    Ok(channels)
 }
 
 pub async fn create_channel(
@@ -242,7 +241,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_channels_by_user_exists() {
         // do pre and post
-        let channels = get_channels_created_by_user(2).await;
+        let result = get_channels_created_by_user(2).await;
+        let channels = result.unwrap();
         println!("Channels count: {}", channels.len());
         assert!(channels.is_empty() == false);
     }
@@ -250,7 +250,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_channels_by_user_not_exists() {
         // do pre and post
-        let channels = get_channels_created_by_user(100).await;
+        let result = get_channels_created_by_user(100).await;
+        let channels = result.unwrap();
         assert!(channels.is_empty() == true);
     }
 }

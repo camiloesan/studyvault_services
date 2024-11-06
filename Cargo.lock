@@ -638,6 +638,7 @@ dependencies = [
  "actix-web",
  "chrono",
  "data_access",
+ "log",
  "mysql",
  "serde",
  "serde_json",

@@ -69,7 +69,7 @@ create table comments(
 
 create table files(
     file_id varchar(36) not null,
-    name varchar(32) not null,
+    name varchar(256) not null,
     primary key(file_id),
     unique(file_id)
 );

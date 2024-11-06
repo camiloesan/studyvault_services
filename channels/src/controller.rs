@@ -2,6 +2,7 @@ use crate::channel;
 use crate::channel::ChannelUpdateData;
 use crate::sql_operations;
 use actix_web::{web, HttpResponse, Responder};
+use log::error;
 
 pub async fn get_all_channels() -> impl Responder {
     let channels = sql_operations::get_all_channels().await;
@@ -14,8 +15,15 @@ pub async fn get_subscriptions_by_user(user_id: web::Path<u32>) -> impl Responde
 }
 
 pub async fn get_channels_created_by_user(user_id: web::Path<u32>) -> impl Responder {
-    let channels = sql_operations::get_channels_created_by_user(*user_id).await;
-    HttpResponse::Ok().json(channels)
+    let result = sql_operations::get_channels_created_by_user(*user_id).await;
+
+    match result {
+        Ok(channels) => HttpResponse::Ok().json(channels),
+        Err(_) => {
+            error!("Failed to fetch channels created by user");
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }
 
 pub async fn create_channel(channel: web::Json<channel::Channel>) -> impl Responder {
@@ -33,7 +41,10 @@ pub async fn create_channel(channel: web::Json<channel::Channel>) -> impl Respon
     HttpResponse::Ok() //200
 }
 
-pub async fn update_channel(channel_id: web::Path<u32>, channel_data: web::Json<ChannelUpdateData>) -> impl Responder {
+pub async fn update_channel(
+    channel_id: web::Path<u32>,
+    channel_data: web::Json<ChannelUpdateData>,
+) -> impl Responder {
     let name = channel_data.name.clone();
     let description = channel_data.description.clone();
     let category_id = channel_data.category_id;
@@ -41,7 +52,7 @@ pub async fn update_channel(channel_id: web::Path<u32>, channel_data: web::Json<
     let result = sql_operations::update_channel(*channel_id, name, description, category_id).await;
 
     if !result {
-        return HttpResponse::InternalServerError() // 500
+        return HttpResponse::InternalServerError(); // 500
     }
 
     HttpResponse::Ok() // 200
@@ -53,7 +64,7 @@ pub async fn delete_channel(channel_id: web::Path<u32>) -> impl Responder {
     let result = sql_operations::delete_channel(id).await;
 
     if !result {
-        return HttpResponse::NotFound() //404
+        return HttpResponse::NotFound(); //404
     }
 
     HttpResponse::Ok() //200

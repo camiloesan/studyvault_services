@@ -20,29 +20,17 @@ impl PostsService for PostsServicesStruct {
         println!("upload requested");
         let mut stream = request.into_inner();
         let uuid: String = Uuid::new_v4().to_string();
-        let mut sql_result = false;
+
+        let mut channel_id = None;
+        let mut file_name = None;
+        let mut title = None;
+        let mut description = None;
 
         while let Some(file_chunk) = stream.message().await? {
-            let channel_id = Some(file_chunk.channel_id);
-            let file_name = Some(file_chunk.filename);
-            let title = Some(file_chunk.title);
-            let description = Some(file_chunk.description);
-
-            sql_result = sql_operations::create_post(
-                uuid.clone(),
-                channel_id.unwrap(),
-                file_name.clone().unwrap(),
-                title.unwrap(),
-                description.unwrap(),
-            )
-            .await;
-
-            if !sql_result {
-                return Ok(Response::new(UploadStatusResponse {
-                    success: false,
-                    message: format!("Failed to upload file"),
-                }));
-            }
+            channel_id = Some(file_chunk.channel_id);
+            file_name = Some(file_chunk.filename);
+            title = Some(file_chunk.title);
+            description = Some(file_chunk.description);
 
             tokio::fs::create_dir_all(format!("/data/files/{}", &channel_id.unwrap().to_string()))
                 .await
@@ -68,6 +56,22 @@ impl PostsService for PostsServicesStruct {
                     Status::internal("Failed to write file data")
                 })?;
             }
+        }
+
+        let sql_result = sql_operations::create_post(
+            uuid.clone(),
+            channel_id.unwrap(),
+            file_name.clone().unwrap(),
+            title.unwrap(),
+            description.unwrap(),
+        )
+        .await;
+
+        if !sql_result {
+            return Ok(Response::new(UploadStatusResponse {
+                success: false,
+                message: format!("Failed to upload file"),
+            }));
         }
 
         Ok(Response::new(UploadStatusResponse {
