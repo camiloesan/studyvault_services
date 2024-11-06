@@ -5,13 +5,27 @@ use actix_web::{web, HttpResponse, Responder};
 use log::error;
 
 pub async fn get_all_channels() -> impl Responder {
-    let channels = sql_operations::get_all_channels().await;
-    HttpResponse::Ok().json(channels)
+    let result = sql_operations::get_all_channels().await;
+
+    match result {
+        Ok(channels) => HttpResponse::Ok().json(channels),
+        Err(e) => {
+            error!("Failed to fetch all channels: {}", e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }
 
 pub async fn get_subscriptions_by_user(user_id: web::Path<u32>) -> impl Responder {
-    let channels = sql_operations::get_subscriptions_by_user(*user_id).await;
-    HttpResponse::Ok().json(channels)
+    let result = sql_operations::get_subscriptions_by_user(*user_id).await;
+
+    match result {
+        Ok(channels) => HttpResponse::Ok().json(channels),
+        Err(e) => {
+            error!("Failed to fetch subscriptions by user: {}", e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }
 
 pub async fn get_channels_created_by_user(user_id: web::Path<u32>) -> impl Responder {
@@ -19,8 +33,8 @@ pub async fn get_channels_created_by_user(user_id: web::Path<u32>) -> impl Respo
 
     match result {
         Ok(channels) => HttpResponse::Ok().json(channels),
-        Err(_) => {
-            error!("Failed to fetch channels created by user");
+        Err(e) => {
+            error!("Failed to fetch channels created by user: {}", e);
             HttpResponse::InternalServerError().finish()
         }
     }

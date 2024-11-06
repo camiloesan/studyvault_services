@@ -13,7 +13,7 @@ pub struct Channel {
     category_name: String,
 }
 
-pub async fn get_all_channels() -> Vec<Channel> {
+pub async fn get_all_channels() -> Result<Vec<Channel>, mysql::Error> {
     let mut conn = data_access::get_connection();
     let query =
         "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
@@ -33,13 +33,12 @@ pub async fn get_all_channels() -> Vec<Channel> {
         println!("{}", channel.description.clone());
 
         channels.push(channel);
-    })
-    .expect("failed to get developer information");
+    })?;
 
-    channels
+    Ok(channels)
 }
 
-pub async fn get_subscriptions_by_user(user_id: u32) -> Vec<Channel> {
+pub async fn get_subscriptions_by_user(user_id: u32) -> Result<Vec<Channel>, mysql::Error> {
     let mut conn = data_access::get_connection();
     let query =
         "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
@@ -59,10 +58,9 @@ pub async fn get_subscriptions_by_user(user_id: u32) -> Vec<Channel> {
             category_name: row.take("category_name").unwrap(),
         };
         channels.push(channel);
-    })
-    .expect("failed to get developer information");
+    })?;
 
-    channels
+    Ok(channels)
 }
 
 pub async fn get_channels_created_by_user(user_id: u32) -> Result<Vec<Channel>, mysql::Error> {
@@ -233,7 +231,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_channels() {
         // do pre and post
-        let channels = get_all_channels().await;
+        let result = get_all_channels().await;
+        let channels = result.unwrap();
         println!("Channel name: {}", channels[0].name);
         assert!(channels.is_empty() == false);
     }
