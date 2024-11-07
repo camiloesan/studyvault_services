@@ -8,11 +8,11 @@ pub async fn create_subscription(subscription: web::Json<Subscription>) -> impl 
 
     let result = sql_operations::subscribe_to_channel(user_id, channel_id).await;
 
-    if !result {
-        return HttpResponse::InternalServerError(); //500 or created
+    match result {
+        Ok(true) => HttpResponse::Ok(),                   //200
+        Ok(false) => HttpResponse::InternalServerError(), //500
+        Err(_) => HttpResponse::InternalServerError(),    //500
     }
-
-    HttpResponse::Ok() //200
 }
 
 pub async fn unsubscribe_from_channel(subscription: web::Json<Subscription>) -> impl Responder {
@@ -21,9 +21,9 @@ pub async fn unsubscribe_from_channel(subscription: web::Json<Subscription>) -> 
 
     let result = sql_operations::unsubscribe_from_channel(user_id, channel_id).await;
 
-    if !result {
-        return HttpResponse::InternalServerError(); //500 or created
+    match result {
+        Ok(true) => HttpResponse::Ok(),                   //200
+        Ok(false) => HttpResponse::InternalServerError(), //500
+        Err(_) => HttpResponse::InternalServerError(),    //500
     }
-
-    HttpResponse::Ok() //200
 }
