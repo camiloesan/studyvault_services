@@ -4,6 +4,7 @@ use crate::posts::ChannelRequest;
 use crate::posts::PostsResponse;
 use crate::posts::{FileChunk, UploadStatusResponse};
 use crate::sql_operations;
+use log::{error, info};
 use tokio::io::AsyncWriteExt;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
@@ -17,7 +18,8 @@ impl PostsService for PostsServicesStruct {
         &self,
         request: Request<tonic::Streaming<FileChunk>>,
     ) -> Result<Response<UploadStatusResponse>, Status> {
-        println!("upload requested");
+        info!("Received request to upload post");
+
         let mut stream = request.into_inner();
         let uuid: String = Uuid::new_v4().to_string();
 
@@ -35,7 +37,7 @@ impl PostsService for PostsServicesStruct {
             tokio::fs::create_dir_all(format!("/data/files/{}", &channel_id.unwrap().to_string()))
                 .await
                 .map_err(|e| {
-                    eprintln!("Failed to create directory: {:?}", e);
+                    error!("Failed to create directory: {:?}", e);
                     Status::internal("Failed to create directory")
                 })?;
 
@@ -46,13 +48,13 @@ impl PostsService for PostsServicesStruct {
                 format!("{}.{}", &uuid, extension)
             );
             let mut file = Some(tokio::fs::File::create(file_path).await.map_err(|e| {
-                eprintln!("Failed to create file: {:?}", e);
+                error!("Failed to create file: {:?}", e);
                 Status::internal("Failed to create file")
             })?);
 
             if let Some(ref mut f) = file {
                 f.write_all(&file_chunk.content).await.map_err(|e| {
-                    eprintln!("Failed to write file data: {:?}", e);
+                    error!("Failed to write file data: {:?}", e);
                     Status::internal("Failed to write file data")
                 })?;
             }
@@ -67,17 +69,24 @@ impl PostsService for PostsServicesStruct {
         )
         .await;
 
-        if !sql_result {
-            return Ok(Response::new(UploadStatusResponse {
-                success: false,
-                message: format!("Failed to upload file"),
-            }));
-        }
+        match sql_result {
+            Ok(result) => {
+                info!("File uploaded to server successfully");
 
-        Ok(Response::new(UploadStatusResponse {
-            success: sql_result,
-            message: format!("File uploaded successfully"),
-        }))
+                Ok(Response::new(UploadStatusResponse {
+                    success: result,
+                    message: format!("File uploaded successfully"),
+                }))
+            }
+            Err(e) => {
+                error!("Failed to insert file data: {:?}", e);
+
+                return Ok(Response::new(UploadStatusResponse {
+                    success: false,
+                    message: format!("Failed to upload file"),
+                }));
+            }
+        }
     }
 
     async fn get_posts_by_channel_id(
@@ -86,9 +95,14 @@ impl PostsService for PostsServicesStruct {
     ) -> Result<Response<PostsResponse>, Status> {
         let channel_id = request.into_inner().channel_id;
 
-        let db_posts = sql_operations::get_posts_by_channel_id(channel_id).await;
+        let result = sql_operations::get_posts_by_channel_id(channel_id).await;
 
-        let post_infos: Vec<PostInfo> = db_posts
+        if result.is_err() {
+            return Err(Status::internal("Failed to get posts"));
+        }
+
+        let post_infos: Vec<PostInfo> = result
+            .unwrap()
             .into_iter()
             .map(|post| PostInfo {
                 post_id: post.post_id,

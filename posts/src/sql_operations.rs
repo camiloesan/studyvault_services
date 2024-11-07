@@ -3,7 +3,7 @@ use actix_web::cookie::time::Date;
 use data_access;
 use mysql::{params, prelude::Queryable, Row};
 
-pub async fn get_posts_by_channel_id(channel_id: u32) -> Vec<Post> {
+pub async fn get_posts_by_channel_id(channel_id: u32) -> Result<Vec<Post>, mysql::Error> {
     let mut conn = data_access::get_connection();
     let query = "SELECT * FROM posts WHERE channel_id = :channel_id";
 
@@ -26,10 +26,9 @@ pub async fn get_posts_by_channel_id(channel_id: u32) -> Vec<Post> {
             };
             posts.push(post);
         },
-    )
-    .expect("failed to get developer information");
+    )?;
 
-    posts
+    Ok(posts)
 }
 
 pub async fn create_post(
@@ -38,54 +37,65 @@ pub async fn create_post(
     file_name: String,
     title: String,
     description: String,
-) -> bool {
+) -> Result<bool, mysql::Error> {
     let mut conn = data_access::get_connection();
 
+    let mut transaction = conn.start_transaction(mysql::TxOpts::default())?;
     let first_query = "INSERT INTO files (file_id, name) VALUES (:file_id, :file_name)";
-    let f_result = conn
-        .exec_iter(
-            first_query,
-            params! {
-                "file_id" => &uuid,
-                "file_name" => file_name,
-            },
-        )
-        .expect("Failed to insert file")
-        .affected_rows();
+    transaction.exec_iter(
+        first_query,
+        params! {
+            "file_id" => &uuid,
+            "file_name" => file_name,
+        },
+    )?;
 
     let second_query = "INSERT INTO posts (channel_id, file_id, title, description, publish_date)
         VALUES (:channel_id, :file_id, :title, :description, NOW())";
-    let s_result = conn
-        .exec_iter(
-            second_query,
-            params! {
-                "channel_id" => channel_id,
-                "file_id" => uuid,
-                "title" => title,
-                "description" => description,
-            },
-        )
-        .expect("Failed to create post")
-        .affected_rows();
+    transaction.exec_iter(
+        second_query,
+        params! {
+            "channel_id" => channel_id,
+            "file_id" => uuid,
+            "title" => title,
+            "description" => description,
+        },
+    )?;
 
-    f_result == 1 && s_result == 1
+    let affected_rows = transaction.affected_rows();
+    let mut result = false;
+    if affected_rows == 1 {
+        transaction.commit()?;
+        result = true;
+    } else {
+        transaction.rollback()?;
+    }
+
+    Ok(result)
 }
 
-pub async fn _delete_post_by_file_uuid(uuid: String) -> bool {
+pub async fn _delete_post_by_file_uuid(uuid: String) -> Result<bool, mysql::Error> {
     let mut conn = data_access::get_connection();
 
-    let query = "DELETE FROM posts WHERE file_id = :file_id";
-    let result = conn
-        .exec_iter(
-            query,
-            params! {
-                "file_id" => uuid,
-            },
-        )
-        .expect("Failed to delete post")
-        .affected_rows();
+    let mut transaction = conn.start_transaction(mysql::TxOpts::default())?;
+    let query = "DELETE FROM files WHERE file_id = :file_id";
+    transaction.exec_iter(
+        query,
+        params! {
+            "file_id" => &uuid,
+        },
+    )?;
+    let affected_rows = transaction.affected_rows();
 
-    result == 1
+    let mut result = false;
+    if affected_rows == 1 {
+        transaction.commit()?;
+        result = true;
+    } else {
+        transaction.rollback()?;
+    }
+
+    Ok(result)
 }
 
 #[cfg(test)]
@@ -96,8 +106,20 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_posts_by_channel() {
-        let posts = get_posts_by_channel_id(1).await;
-        assert_eq!(posts.len(), 2);
+        // pre
+        let channel_id = 1;
+        let file_name = "test.pdf".to_string();
+        let title = "Test Post".to_string();
+        let description = "This is a test post".to_string();
+        let uuid = Uuid::new_v4().to_string();
+        let _ = create_post(uuid.clone(), channel_id, file_name, title, description).await;
+
+        let result = get_posts_by_channel_id(1).await;
+        let posts = result.unwrap();
+        assert_eq!(posts.len() > 0, true);
+
+        // post
+        let _ = _delete_post_by_file_uuid(uuid).await;
     }
 
     #[tokio::test]
@@ -107,11 +129,11 @@ mod tests {
         let title = "Test Post".to_string();
         let description = "This is a test post".to_string();
         let uuid = Uuid::new_v4().to_string();
-
         let result = create_post(uuid.clone(), channel_id, file_name, title, description).await;
 
-        _delete_post_by_file_uuid(uuid).await;
+        assert_eq!(result.unwrap(), true);
 
-        assert_eq!(result, true);
+        // post
+        let _ = _delete_post_by_file_uuid(uuid).await;
     }
 }

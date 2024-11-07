@@ -26,3 +26,4 @@ rand = "*"
 lazy_static = "*"
 reqwest = { version = "0.11", features = ["json"] }
 log = "*"
+env_logger = "*"

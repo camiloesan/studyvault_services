@@ -17,7 +17,7 @@ COPY users/Cargo.toml users/
 
 COPY . .
 
-RUN cargo build -p posts --release
+RUN RUST_LOG=trace cargo build -p posts --release
 
 FROM ubuntu:22.04
 
