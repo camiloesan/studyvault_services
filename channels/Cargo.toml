@@ -13,3 +13,5 @@ mysql = { workspace = true }
 tokio = { workspace = true }
 chrono = { workspace = true }
 log = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }

@@ -14,7 +14,7 @@ pub struct Channel {
 }
 
 pub async fn get_all_channels() -> Result<Vec<Channel>, mysql::Error> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe()?;
     let query =
         "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
         FROM channels INNER JOIN users ON channels.creator_id = users.user_id
@@ -39,7 +39,7 @@ pub async fn get_all_channels() -> Result<Vec<Channel>, mysql::Error> {
 }
 
 pub async fn get_subscriptions_by_user(user_id: u32) -> Result<Vec<Channel>, mysql::Error> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe()?;
     let query =
         "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
         FROM channels INNER JOIN users ON channels.creator_id = users.user_id
@@ -64,7 +64,7 @@ pub async fn get_subscriptions_by_user(user_id: u32) -> Result<Vec<Channel>, mys
 }
 
 pub async fn get_channels_created_by_user(user_id: u32) -> Result<Vec<Channel>, mysql::Error> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe()?;
     let query =
         "SELECT channels.*, users.name as creator_name, users.last_name as creator_last_name, categories.name as category_name
         FROM channels INNER JOIN users ON channels.creator_id = users.user_id

@@ -1,9 +1,16 @@
 use crate::channel;
 use crate::channel::ChannelUpdateData;
 use crate::sql_operations;
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use log::error;
 
+#[utoipa::path(
+    responses(
+        (status = 200, description = "Returns all channels.", body = [Channel]),
+        (status = 500, description = "Internal server error occurred."),
+    )
+)]
+#[get("/channels/all")]
 pub async fn get_all_channels() -> impl Responder {
     let result = sql_operations::get_all_channels().await;
 
@@ -16,6 +23,13 @@ pub async fn get_all_channels() -> impl Responder {
     }
 }
 
+#[utoipa::path(
+    responses(
+        (status = 200, description = "Returns all channels which the user is subscribed to.", body = [Channel]),
+        (status = 500, description = "Internal server error occurred.")
+    )
+)]
+#[get("/subscriptions/user/{id}")]
 pub async fn get_subscriptions_by_user(user_id: web::Path<u32>) -> impl Responder {
     let result = sql_operations::get_subscriptions_by_user(*user_id).await;
 
@@ -28,6 +42,13 @@ pub async fn get_subscriptions_by_user(user_id: web::Path<u32>) -> impl Responde
     }
 }
 
+#[utoipa::path(
+    responses(
+        (status = 200, description = "Returns all channels created by an user.", body = [Channel]),
+        (status = 500, description = "Internal server error occurred.")
+    )
+)]
+#[get("/channels/owner/{id}")]
 pub async fn get_channels_created_by_user(user_id: web::Path<u32>) -> impl Responder {
     let result = sql_operations::get_channels_created_by_user(*user_id).await;
 
