@@ -4,6 +4,7 @@ use crate::sql_operations;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use log::error;
 
+/// Returns all channels stored in database.
 #[utoipa::path(
     responses(
         (status = 200, description = "Returns all channels.", body = [Channel]),
@@ -23,6 +24,7 @@ pub async fn get_all_channels() -> impl Responder {
     }
 }
 
+/// Returns a ser of channels where a user is subscribed to.
 #[utoipa::path(
     responses(
         (status = 200, description = "Returns all channels which the user is subscribed to.", body = [Channel]),
@@ -42,6 +44,7 @@ pub async fn get_subscriptions_by_user(user_id: web::Path<u32>) -> impl Responde
     }
 }
 
+/// Returns all channels created by an user.
 #[utoipa::path(
     responses(
         (status = 200, description = "Returns all channels created by an user.", body = [Channel]),
