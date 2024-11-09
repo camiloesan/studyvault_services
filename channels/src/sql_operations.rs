@@ -230,10 +230,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_channels() {
-        // do pre and post
         let result = get_all_channels().await;
         let channels = result.unwrap();
-        println!("Channel name: {}", channels[0].name);
         assert!(channels.is_empty() == false);
     }
 
