@@ -1,9 +1,11 @@
-mod controller;
+mod routes;
 mod sql_operations;
 mod subscription;
 
 use actix_cors::Cors;
-use actix_web::{web, App, HttpServer};
+use actix_web::{App, HttpServer};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -13,15 +15,21 @@ async fn main() -> std::io::Result<()> {
             .allow_any_method()
             .allow_any_header();
 
+        #[derive(OpenApi)]
+        #[openapi(
+            paths(routes::create_subscription, routes::unsubscribe_from_channel,),
+            components(schemas(subscription::Subscription))
+        )]
+        struct ApiDoc;
+
+        let openapi = ApiDoc::openapi();
+
         App::new()
-            .route(
-                "/subscription",
-                web::post().to(controller::create_subscription),
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", openapi.clone()),
             )
-            .route(
-                "/unsubscribe",
-                web::delete().to(controller::unsubscribe_from_channel),
-            )
+            .service(routes::create_subscription)
+            .service(routes::unsubscribe_from_channel)
             .wrap(cors)
     })
     .bind("0.0.0.0:8082")?

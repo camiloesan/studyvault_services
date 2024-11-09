@@ -12,3 +12,5 @@ serde_json = { workspace = true }
 mysql = { workspace = true }
 tokio = { workspace = true }
 chrono = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }

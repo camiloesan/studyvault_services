@@ -1,8 +1,9 @@
 use data_access;
 use mysql::{params, prelude::Queryable};
 
+/// Subscribes an user to a channel in mysql database.
 pub async fn subscribe_to_channel(user_id: u32, channel_id: u32) -> Result<bool, mysql::Error> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe()?;
     let query = "INSERT INTO subscriptions (user_id, channel_id) VALUES (:user_id, :channel_id)";
     let result = conn.exec_iter(
         &query,
@@ -15,8 +16,9 @@ pub async fn subscribe_to_channel(user_id: u32, channel_id: u32) -> Result<bool,
     Ok(result.affected_rows() == 1)
 }
 
+/// Unsubscribes an user from a channel in mysql database.
 pub async fn unsubscribe_from_channel(user_id: u32, channel_id: u32) -> Result<bool, mysql::Error> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe()?;
     let query = "DELETE FROM subscriptions WHERE user_id = :user_id AND channel_id = :channel_id";
     let result = conn.exec_iter(
         &query,

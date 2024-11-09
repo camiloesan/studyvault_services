@@ -2576,6 +2576,8 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "utoipa",
+ "utoipa-swagger-ui",
 ]
 
 [[package]]
