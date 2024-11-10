@@ -2701,8 +2701,9 @@ version = "0.1.0"
 dependencies = [
  "actix-cors",
  "actix-web",
- "chrono",
- "data_access",
+ "async-trait",
+ "env_logger",
+ "log",
  "mysql",
  "serde",
  "serde_json",

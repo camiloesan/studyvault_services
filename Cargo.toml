@@ -29,6 +29,7 @@ log = "*"
 env_logger = "*"
 utoipa = { version = "4.2.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["actix-web"] }
+async-trait = "0.1.83"
 jsonwebtoken = "8.1"
 actix-web-httpauth = "0.6"
 futures = "0.3"
