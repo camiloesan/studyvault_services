@@ -2,13 +2,13 @@
 resolver = "2"
 
 members = [
+    "auth",
     "data_access",
     "channels",
     "comments",
     "posts",
     "subscriptions",
     "users",
-    "auth",
 ]
 
 [workspace.dependencies]
@@ -29,3 +29,6 @@ log = "*"
 env_logger = "*"
 utoipa = { version = "4.2.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["actix-web"] }
+jsonwebtoken = "8.1"
+actix-web-httpauth = "0.6"
+futures = "0.3"

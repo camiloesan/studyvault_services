@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: channels/Dockerfile
+    env_file:
+      - auth/.env
     image: service-channels:latest
     ports:
       - "8080:8080"

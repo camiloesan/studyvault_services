@@ -4,8 +4,10 @@ mod sql_operations;
 
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+use auth::validate_jwt;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -29,6 +31,8 @@ async fn main() -> std::io::Result<()> {
         let openapi = ApiDoc::openapi();
 
         App::new()
+            .wrap(HttpAuthentication::bearer(validate_jwt))
+            .wrap(cors)
             .service(
                 SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", openapi.clone()),
             )
@@ -59,7 +63,6 @@ async fn main() -> std::io::Result<()> {
                 "/creator/channel/{id}",
                 web::get().to(controller::get_creator_id_by_channel_id),
             )
-            .wrap(cors)
     })
     .bind("0.0.0.0:8080")?
     .run()

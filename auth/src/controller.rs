@@ -3,6 +3,7 @@ use crate::auth::{LoginData, VerificationRequest};
 use actix_web::{web, HttpResponse, Responder};
 use crate::email_operations::{generate_verification_code, send_verification_email};
 use crate::email_operations::VERIFICATION_CODES;
+use auth::generate_jwt;
 
 pub async fn login_user(login_data: web::Json<LoginData>) -> impl Responder {
     let email = login_data.email.clone();
@@ -11,10 +12,17 @@ pub async fn login_user(login_data: web::Json<LoginData>) -> impl Responder {
     let result = sql_operations::login(email, password).await;
 
     if let Some(user) = result {
-        return HttpResponse::Ok().json(user); //200
+        match generate_jwt(user.user_id as i32) {
+            Ok(token) => {
+                HttpResponse::Ok()
+                    .insert_header(("x-token", token))
+                    .json(user)
+            },
+            Err(_) => HttpResponse::InternalServerError().finish(),
+        }
+    } else {
+        HttpResponse::Unauthorized().finish()
     }
-
-    HttpResponse::Unauthorized().finish() //401
 }
 
 pub async fn request_verification(email: web::Json<String>) -> impl Responder {
