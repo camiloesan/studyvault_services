@@ -1,14 +1,19 @@
+mod model;
+mod repository;
 mod routes;
-mod sql_operations;
-mod subscription;
+mod sql_repo;
 
 use actix_cors::Cors;
-use actix_web::{App, HttpServer};
+use actix_web::{web, App, HttpServer};
+use sql_repo::MySQLSubscriptionsRepository;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let url = "mysql://root:123456@mysql:3306/study_vault";
+    let repo: MySQLSubscriptionsRepository = MySQLSubscriptionsRepository::new(url);
+
     HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin()
@@ -18,13 +23,14 @@ async fn main() -> std::io::Result<()> {
         #[derive(OpenApi)]
         #[openapi(
             paths(routes::create_subscription, routes::unsubscribe_from_channel,),
-            components(schemas(subscription::Subscription))
+            components(schemas(model::Subscription))
         )]
         struct ApiDoc;
 
         let openapi = ApiDoc::openapi();
 
         App::new()
+            .app_data(web::Data::new(repo.clone()))
             .service(
                 SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", openapi.clone()),
             )

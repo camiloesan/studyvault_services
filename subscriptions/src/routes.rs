@@ -1,6 +1,7 @@
-use crate::sql_operations;
-use crate::subscription::Subscription;
+use crate::model::Subscription;
+use crate::{repository::SubscriptionsRepository, sql_repo::MySQLSubscriptionsRepository};
 use actix_web::{delete, post, web, HttpResponse, Responder};
+use log::error;
 
 /// Subscribe an user to a channel given Subscription schema.
 #[utoipa::path(
@@ -11,16 +12,17 @@ use actix_web::{delete, post, web, HttpResponse, Responder};
     )
 )]
 #[post("/subscription")]
-pub async fn create_subscription(subscription: web::Json<Subscription>) -> impl Responder {
-    let user_id = subscription.user_id;
-    let channel_id = subscription.channel_id;
-
-    let result = sql_operations::subscribe_to_channel(user_id, channel_id).await;
-
-    match result {
+pub async fn create_subscription(
+    repo: web::Data<MySQLSubscriptionsRepository>,
+    subscription: web::Json<Subscription>,
+) -> impl Responder {
+    match repo.subscribe(subscription.into_inner()).await {
         Ok(true) => HttpResponse::Ok(),                   //200
         Ok(false) => HttpResponse::InternalServerError(), //500
-        Err(_) => HttpResponse::InternalServerError(),    //500
+        Err(e) => {
+            error!("Database exception ocurred: {}", e);
+            HttpResponse::InternalServerError()
+        } //500
     }
 }
 
@@ -33,15 +35,16 @@ pub async fn create_subscription(subscription: web::Json<Subscription>) -> impl 
     )
 )]
 #[delete("/unsubscribe")]
-pub async fn unsubscribe_from_channel(subscription: web::Json<Subscription>) -> impl Responder {
-    let user_id = subscription.user_id;
-    let channel_id = subscription.channel_id;
-
-    let result = sql_operations::unsubscribe_from_channel(user_id, channel_id).await;
-
-    match result {
+pub async fn unsubscribe_from_channel(
+    repo: web::Data<MySQLSubscriptionsRepository>,
+    subscription: web::Json<Subscription>,
+) -> impl Responder {
+    match repo.unsubscribe(subscription.into_inner()).await {
         Ok(true) => HttpResponse::Ok(),                   //200
         Ok(false) => HttpResponse::InternalServerError(), //500
-        Err(_) => HttpResponse::InternalServerError(),    //500
+        Err(e) => {
+            error!("Database exception ocurred: {}", e);
+            HttpResponse::InternalServerError()
+        } //500
     }
 }
