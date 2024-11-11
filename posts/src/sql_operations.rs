@@ -1,3 +1,5 @@
+use std::result;
+
 use crate::post::Post;
 use actix_web::cookie::time::Date;
 use data_access;
@@ -94,6 +96,23 @@ pub async fn _delete_post_by_file_uuid(uuid: String) -> Result<bool, mysql::Erro
     } else {
         transaction.rollback()?;
     }
+
+    Ok(result)
+}
+
+pub async fn get_file_name(uuid: String) -> Result<String, mysql::Error> {
+    let mut conn = data_access::get_connection();
+    let query = "SELECT name FROM files WHERE file_id = :file_id";
+
+    let mut result: String = Default::default();
+
+    conn.exec_map(
+        &query,
+        params! { "file_id" => uuid },
+        |mut row: Row| {
+            result = row.take("name").unwrap()
+        },
+    )?;
 
     Ok(result)
 }

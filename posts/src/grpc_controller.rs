@@ -3,6 +3,7 @@ use crate::posts::posts_service_server::PostsService;
 use crate::posts::ChannelRequest;
 use crate::posts::PostsResponse;
 use crate::posts::{FileChunk, UploadStatusResponse};
+use crate::posts::{FileId, FileName};
 use crate::sql_operations;
 use log::{error, info};
 use tokio::io::AsyncWriteExt;
@@ -115,6 +116,25 @@ impl PostsService for PostsServicesStruct {
             .collect();
 
         let response = PostsResponse { posts: post_infos };
+
+        Ok(Response::new(response))
+    }
+
+    async fn get_file_name_by_file_id(
+        &self,
+        request: Request<FileId>,
+    ) -> Result<Response<FileName>, Status> {
+        let file_id = request.into_inner().file_id;
+
+        let result = sql_operations::get_file_name(file_id).await;
+
+        if result.is_err() {
+            return Err(Status::internal("Failed to get file name"));
+        }
+
+        let name = result.unwrap();
+
+        let response = FileName { filename: name };
 
         Ok(Response::new(response))
     }
