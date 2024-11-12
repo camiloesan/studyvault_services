@@ -1,14 +1,16 @@
 use crate::posts::posts_response::PostInfo;
 use crate::posts::posts_service_server::PostsService;
-use crate::posts::ChannelRequest;
-use crate::posts::PostsResponse;
-use crate::posts::{FileChunk, UploadStatusResponse};
-use crate::posts::{FileId, FileName};
+use crate::posts::{ChannelRequest, FileChunk, FileData, FileDownloadRequest, FileId, FileName, PostsResponse, UploadStatusResponse};
 use crate::sql_operations;
 use log::{error, info};
+use tokio::fs::File;
+use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
+use futures_util::Stream;
+use async_stream::try_stream;
+use std::pin::Pin;
 
 #[derive(Default)]
 pub struct PostsServicesStruct;
@@ -138,4 +140,55 @@ impl PostsService for PostsServicesStruct {
 
         Ok(Response::new(response))
     }
+
+    type DownloadFileStream = Pin<Box<dyn Stream<Item = Result<FileData, Status>> + Send>>;
+
+    async fn download_file(
+        &self,
+        request: Request<FileDownloadRequest>,
+    ) -> Result<Response<Self::DownloadFileStream>, Status> {
+        let request = request.into_inner();
+        let file_id = request.file_id.clone();
+        let channel_id = request.channel_id;
+
+        let file_name = sql_operations::get_file_name(file_id.clone()).await.map_err(|e| {
+            error!("Failed to get file name: {:?}", e);
+            Status::internal("Failed to get file name")
+        })?;
+
+        let extension = file_name.split('.').last().unwrap_or("");
+
+        let file_path = format!("/data/files/{}/{}.{}", channel_id, file_id, extension);
+
+        let mut file = File::open(&file_path)
+            .await
+            .map_err(|e| {
+                error!("Failed to open file: {:?}", e);
+                Status::not_found("File not found")
+            })?;
+
+        let file_stream = try_stream! {
+            let mut buffer = vec![0; 1024];
+
+            loop {
+                let bytes_read = file.read(&mut buffer).await.map_err(|e| {
+                    error!("Failed to read file: {:?}", e);
+                    Status::internal("Failed to read file")
+                })?;
+
+                if bytes_read == 0 {
+                    break;
+                }
+
+                let chunk = FileData {
+                    content: buffer[..bytes_read].to_vec(),
+                    filename: file_id.clone(),
+                };
+
+                yield chunk;
+            }
+        };
+
+        Ok(Response::new(Box::pin(file_stream) as Self::DownloadFileStream))
+    }    
 }
