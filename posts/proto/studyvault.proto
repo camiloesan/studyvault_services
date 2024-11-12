@@ -6,7 +6,6 @@ service PostsService {
     rpc UploadPost (stream FileChunk) returns (UploadStatusResponse);
     rpc GetFileNameByFileId (FileId) returns (FileName);
     rpc DownloadFile (FileDownloadRequest) returns (stream FileData);
-  //  rpc DownloadFile (UploadStatus) returns (stream FileData);
 }
 
 message ChannelRequest {
@@ -50,11 +49,6 @@ message FileDownloadRequest {
     string file_id = 1;
     uint32 channel_id = 2;
 }
-
-//message FileData {
-  //  bytes content = 1;
-    //string filename = 2;
-//}
 
 message UploadStatusResponse {
     bool success = 1;
