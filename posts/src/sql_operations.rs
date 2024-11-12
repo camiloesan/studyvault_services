@@ -1,5 +1,3 @@
-use std::result;
-
 use crate::post::Post;
 use actix_web::cookie::time::Date;
 use data_access;
