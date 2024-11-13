@@ -142,7 +142,7 @@ pub async fn update_channel(
         .expect("Failed to update channel")
         .affected_rows();
 
-    result == 1
+    result >= 0
 }
 
 pub async fn delete_channel(channel_id: u32) -> bool {
