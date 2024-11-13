@@ -2041,6 +2041,7 @@ dependencies = [
  "chrono",
  "data_access",
  "env_logger",
+ "futures-util",
  "log",
  "mysql",
  "prost",
@@ -2701,7 +2702,9 @@ version = "0.1.0"
 dependencies = [
  "actix-cors",
  "actix-web",
+ "actix-web-httpauth",
  "async-trait",
+ "auth",
  "env_logger",
  "log",
  "mysql",

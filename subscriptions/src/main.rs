@@ -5,6 +5,8 @@ mod sql_repo;
 
 use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
+use actix_web_httpauth::middleware::HttpAuthentication;
+use auth::validate_jwt;
 use sql_repo::MySQLSubscriptionsRepository;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -30,6 +32,7 @@ async fn main() -> std::io::Result<()> {
         let openapi = ApiDoc::openapi();
 
         App::new()
+            .wrap(HttpAuthentication::bearer(validate_jwt))
             .app_data(web::Data::new(repo.clone()))
             .service(
                 SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", openapi.clone()),

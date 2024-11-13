@@ -4,7 +4,8 @@ package studyvault;
 service PostsService {
     rpc GetPostsByChannelId (ChannelRequest) returns (PostsResponse);
     rpc UploadPost (stream FileChunk) returns (UploadStatusResponse);
-  //  rpc DownloadFile (UploadStatus) returns (stream FileData);
+    rpc GetFileNameByFileId (FileId) returns (FileName);
+    rpc DownloadFile (FileDownloadRequest) returns (stream FileData);
 }
 
 message ChannelRequest {
@@ -31,10 +32,23 @@ message FileChunk {
     string description = 5;
 }
 
-//message FileData {
-  //  bytes content = 1;
-    //string filename = 2;
-//}
+message FileId {
+    string file_id = 1;
+}
+
+message FileName {
+    string filename = 1;
+}
+
+message FileData {
+    bytes content = 1;
+    string filename = 2;
+}
+
+message FileDownloadRequest {
+    string file_id = 1;
+    uint32 channel_id = 2;
+}
 
 message UploadStatusResponse {
     bool success = 1;

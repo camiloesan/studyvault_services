@@ -4,7 +4,7 @@ use data_access;
 use mysql::{params, prelude::Queryable, Row};
 
 pub async fn get_posts_by_channel_id(channel_id: u32) -> Result<Vec<Post>, mysql::Error> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe()?;
     let query = "SELECT * FROM posts WHERE channel_id = :channel_id";
 
     let mut posts: Vec<Post> = Vec::new();
@@ -38,7 +38,7 @@ pub async fn create_post(
     title: String,
     description: String,
 ) -> Result<bool, mysql::Error> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe()?;
 
     let mut transaction = conn.start_transaction(mysql::TxOpts::default())?;
     let first_query = "INSERT INTO files (file_id, name) VALUES (:file_id, :file_name)";
@@ -75,7 +75,7 @@ pub async fn create_post(
 }
 
 pub async fn _delete_post_by_file_uuid(uuid: String) -> Result<bool, mysql::Error> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe()?;
 
     let mut transaction = conn.start_transaction(mysql::TxOpts::default())?;
     let query = "DELETE FROM files WHERE file_id = :file_id";
@@ -94,6 +94,19 @@ pub async fn _delete_post_by_file_uuid(uuid: String) -> Result<bool, mysql::Erro
     } else {
         transaction.rollback()?;
     }
+
+    Ok(result)
+}
+
+pub async fn get_file_name(uuid: String) -> Result<String, mysql::Error> {
+    let mut conn = data_access::get_connection();
+    let query = "SELECT name FROM files WHERE file_id = :file_id";
+
+    let mut result: String = Default::default();
+
+    conn.exec_map(&query, params! { "file_id" => uuid }, |mut row: Row| {
+        result = row.take("name").unwrap()
+    })?;
 
     Ok(result)
 }

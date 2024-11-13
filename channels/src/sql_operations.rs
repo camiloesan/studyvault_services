@@ -30,7 +30,6 @@ pub async fn get_all_channels() -> Result<Vec<Channel>, mysql::Error> {
             description: row.take("description").unwrap(),
             category_name: row.take("category_name").unwrap(),
         };
-        println!("{}", channel.description.clone());
 
         channels.push(channel);
     })?;
