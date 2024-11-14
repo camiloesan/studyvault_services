@@ -1,3 +1,4 @@
+use actix_web::test::ok_service;
 use data_access;
 use mysql::{params, prelude::Queryable, Row};
 use serde::{Deserialize, Serialize};
@@ -96,8 +97,8 @@ pub async fn create_channel(
     name: String,
     description: String,
     category_id: u32,
-) -> bool {
-    let mut conn = data_access::get_connection();
+) -> Result<bool, mysql::Error> {
+    let mut conn = data_access::get_connection_safe()?;
     let query = "INSERT INTO channels (creator_id, name, description, category_id)
         VALUES (:creator_id, :name, :description, :category_id)";
 
@@ -110,11 +111,9 @@ pub async fn create_channel(
                 "description" => description,
                 "category_id" => category_id,
             },
-        )
-        .expect("Failed to create channel")
-        .affected_rows();
+        )?;
 
-    result == 1
+    Ok(result.affected_rows() == 1)
 }
 
 pub async fn update_channel(
@@ -122,8 +121,8 @@ pub async fn update_channel(
     name: String,
     description: String,
     category_id: u32,
-) -> bool {
-    let mut conn = data_access::get_connection();
+) -> Result<bool, mysql::Error> {
+    let mut conn = data_access::get_connection_safe()?;
     let query =
         "UPDATE channels SET name = :name, description = :description, category_id = :category_id
         WHERE channel_id = :channel_id";
@@ -137,15 +136,13 @@ pub async fn update_channel(
                 "category_id" => category_id,
                 "channel_id" => channel_id,
             },
-        )
-        .expect("Failed to update channel")
-        .affected_rows();
+        )?;
 
-    result >= 0
+    Ok(result.affected_rows() >= 0)
 }
 
-pub async fn delete_channel(channel_id: u32) -> bool {
-    let mut conn = data_access::get_connection();
+pub async fn delete_channel(channel_id: u32) -> Result<bool, mysql::Error> {
+    let mut conn = data_access::get_connection_safe()?;
 
     let query = "DELETE FROM channels WHERE channel_id = :channel_id";
 
@@ -155,11 +152,9 @@ pub async fn delete_channel(channel_id: u32) -> bool {
             params! {
                 "channel_id" => channel_id
             },
-        )
-        .expect("Failed to execute delete channel query")
-        .affected_rows();
+        )?;
 
-    result == 1
+    Ok(result.affected_rows() == 1)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -168,8 +163,8 @@ pub struct Category {
     name: String,
 }
 
-pub async fn get_all_categories() -> Vec<Category> {
-    let mut conn = data_access::get_connection();
+pub async fn get_all_categories() -> Result<Vec<Category>, mysql::Error> {
+    let mut conn = data_access::get_connection_safe()?;
     let query = "SELECT category_id, name FROM categories";
     let mut categories: Vec<Category> = Vec::new();
 
@@ -179,10 +174,9 @@ pub async fn get_all_categories() -> Vec<Category> {
             name: row.take("name").unwrap(),
         };
         categories.push(category);
-    })
-    .expect("Failed to fetch categories information");
+    })?;
 
-    categories
+    Ok(categories)
 }
 
 pub async fn get_channel_name(channel_id: u32) -> String {
