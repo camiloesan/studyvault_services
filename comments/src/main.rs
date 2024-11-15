@@ -3,7 +3,11 @@ mod comment;
 mod controller;
 
 use actix_cors::Cors;
-use actix_web::{web, App, HttpServer};
+use actix_web::{App, HttpServer};
+use actix_web_httpauth::middleware::HttpAuthentication;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+use auth::validate_jwt;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -13,12 +17,30 @@ async fn main() -> std::io::Result<()> {
             .allow_any_method()
             .allow_any_header();
 
+        #[derive(OpenApi)]
+        #[openapi(
+            paths(
+                controller::comment_post,
+                controller::get_all_comments_by_post_id,
+                controller::update_existing_comment,
+                controller::delete_existing_comment,
+            ),
+            components(schemas(comment::CommentToInsert, comment::Comment, comment::CommentToUpdate))
+        )]
+        struct ApiDoc;
+
+        let openapi = ApiDoc::openapi();
+
         App::new()
-            .route("/comment/all/{id}", web::get().to(controller::get_all_comments_by_post_id))
-            .route("/comment", web::post().to(controller::comment_post))
-            .route("/comment/update/{id}", web::put().to(controller::update_existing_comment))
-            .route("/comment/delete/{id}", web::delete().to(controller::delete_existing_comment))
+            .wrap(HttpAuthentication::bearer(validate_jwt))
             .wrap(cors)
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", openapi.clone()),
+            )
+            .service(controller::comment_post)
+            .service(controller::get_all_comments_by_post_id)
+            .service(controller::update_existing_comment)
+            .service(controller::delete_existing_comment)
     })
     .bind("0.0.0.0:8084")?
     .run()

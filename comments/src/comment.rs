@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ToSchema)]
 
 pub struct CommentToInsert {
     pub post_id: u32,
@@ -9,7 +10,7 @@ pub struct CommentToInsert {
     pub rating: u32
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct Comment {
     pub comment_id: u32,
     pub post_id: u32,
@@ -19,7 +20,7 @@ pub struct Comment {
     pub rating: u32
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ToSchema)]
 
 pub struct CommentToUpdate {
     pub comment_id: u32,
