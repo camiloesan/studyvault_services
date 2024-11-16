@@ -1,6 +1,7 @@
 use crate::sql_operations;
 use crate::auth::{LoginData, VerificationRequest};
 use actix_web::{web, HttpResponse, Responder};
+use log::error;
 use crate::email_operations::{generate_verification_code, send_verification_email};
 use crate::email_operations::VERIFICATION_CODES;
 use auth::generate_jwt;
@@ -22,19 +23,20 @@ pub async fn login_user(login_data: web::Json<LoginData>) -> impl Responder {
     let email = login_data.email.clone();
     let password = login_data.password.clone();
 
-    let result = sql_operations::login(email, password).await;
-
-    if let Some(user) = result {
-        match generate_jwt(user.user_id as i32) {
-            Ok(token) => {
-                HttpResponse::Ok()
-                    .insert_header(("x-token", token))
-                    .json(user)
-            },
-            Err(_) => HttpResponse::InternalServerError().finish(),
+    match sql_operations::login(email, password).await {
+        Some(user) => match generate_jwt(user.user_id as i32) {
+            Ok(token) => HttpResponse::Ok()
+                .insert_header(("x-token", token))
+                .json(user),
+            Err(e) => {
+                error!("Failed to generate JWT: {}", e);
+                HttpResponse::InternalServerError().finish()
+            }
+        },
+        None => {
+            error!("Login failed: Invalid email or password");
+            HttpResponse::Unauthorized().finish()
         }
-    } else {
-        HttpResponse::Unauthorized().finish()
     }
 }
 

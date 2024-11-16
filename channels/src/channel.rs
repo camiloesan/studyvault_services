@@ -15,7 +15,10 @@ pub struct Channel {
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct ChannelUpdateData {
+    #[schema(example = "Software Design", required = true)]
     pub name: String,
+    #[schema(example = "A channel about software design", required = true)]
     pub description: String,
+    #[schema(example = "5", required = true)]
     pub category_id: u32,
 }
