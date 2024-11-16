@@ -44,6 +44,8 @@ services:
     build:
       context: .
       dockerfile: comments/Dockerfile
+    env_file:
+      - auth/.env
     image: service-comments:latest
     ports:
       - "8084:8084"
