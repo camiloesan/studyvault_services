@@ -17,5 +17,8 @@ rand = { workspace = true }
 lazy_static = { workspace = true }
 reqwest = { workspace = true }
 jsonwebtoken = { workspace = true }
-actix-web-httpauth = { workspace = true }
 futures = { workspace = true }
+log = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
+actix-web-httpauth = { workspace = true }

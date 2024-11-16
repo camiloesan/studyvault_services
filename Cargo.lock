@@ -406,12 +406,15 @@ dependencies = [
  "futures",
  "jsonwebtoken",
  "lazy_static",
+ "log",
  "mysql",
  "rand",
  "reqwest",
  "serde",
  "serde_json",
  "tokio",
+ "utoipa",
+ "utoipa-swagger-ui",
 ]
 
 [[package]]
