@@ -147,4 +147,40 @@ mod tests {
         let result = delete_comment(get_last_comment_id().await).await;
         assert!(result);
     }
+
+    #[tokio::test]
+    async fn test_comment_invalid() {
+        let comment_to_insert = CommentToInsert {
+            post_id: 0,
+            user_id: 1,
+            comment: "Test".to_string(),
+            rating: 5
+        };
+        let result = comment(comment_to_insert).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_get_all_comments_invalid() {
+        let result = get_all_comments(0).await;
+        assert!(result.is_empty() == false);
+    }
+
+    #[tokio::test]
+    async fn test_update_comment_invalid() {
+        let comment_to_update = CommentToUpdate {
+            comment_id: 0,
+            comment: "Update test".to_string(),
+            rating: 1
+        };
+
+        let result = update_comment(comment_to_update).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_delete_comment_invalid() {
+        let result = delete_comment(0).await;
+        assert!(result);
+    }
 }
