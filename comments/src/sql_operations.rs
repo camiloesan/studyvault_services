@@ -93,3 +93,58 @@ pub async fn delete_comment(id: u32) -> bool {
 
     result == 1
 }
+
+//only for tests
+pub async fn get_last_comment_id() -> u32 {
+    let mut conn = data_access::get_connection();
+
+    let query = "SELECT MAX(comment_id) FROM comments";
+
+    let result: Option<u32> = conn
+        .query_first(query)
+        .expect("Failed to execute query");
+
+    result.unwrap()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio;
+
+    #[tokio::test]
+    async fn test_comment() {
+        let comment_to_insert = CommentToInsert {
+            post_id: 1,
+            user_id: 1,
+            comment: "Test".to_string(),
+            rating: 5
+        };
+        let result = comment(comment_to_insert).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_get_all_comments() {
+        let result = get_all_comments(1).await;
+        assert!(result.is_empty() == false);
+    }
+
+    #[tokio::test]
+    async fn test_update_comment() {
+        let comment_to_update = CommentToUpdate {
+            comment_id: get_last_comment_id().await,
+            comment: "Update test".to_string(),
+            rating: 1
+        };
+
+        let result = update_comment(comment_to_update).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_delete_comment() {
+        let result = delete_comment(get_last_comment_id().await).await;
+        assert!(result);
+    }
+}
