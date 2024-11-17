@@ -1,16 +1,6 @@
 use crate::user::{RegisterRequest, UserName, UserToUpdate, PasswordToUpdate};
 use data_access;
 use mysql::{params, prelude::Queryable, Row, from_row};
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize)]
-pub struct User {
-    pub user_id: u32,
-    pub user_type_id: u32,
-    pub name: String,
-    pub last_name: String,
-    pub email: String,
-}
 
 pub async fn register_user(request: RegisterRequest) -> bool {
     let user_type_id = if request.email.ends_with("@estudiantes.uv.mx") {
@@ -133,4 +123,129 @@ pub async fn update_password(request: PasswordToUpdate) -> bool {
         .affected_rows();
 
     result == 1
+}
+
+//only for tests
+pub async fn get_last_user_id() -> u32 {
+    let mut conn = data_access::get_connection();
+
+    let query = "SELECT MAX(user_id) FROM users";
+
+    let result: Option<u32> = conn
+        .query_first(query)
+        .expect("Failed to execute query");
+
+    result.unwrap()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio;
+
+    #[tokio::test]
+    async fn test_register_user() {
+        let user_to_insert = RegisterRequest {
+            email: "test@uv.mx".to_string(),
+            name: "test".to_string(),
+            last_name: "test".to_string(),
+            password: "test".to_string()
+        };
+        let result = register_user(user_to_insert).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_get_all_user_emails() {
+        let result = get_all_user_emails().await;
+        assert!(result.is_empty() == false);
+    }
+
+    #[tokio::test]
+    async fn test_update_password() {
+        let password_to_update = PasswordToUpdate {
+            email: "test@uv.mx".to_string(),
+            password: "updatedtest".to_string()
+        };
+
+        let result = update_password(password_to_update).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_get_user_name() {
+        let result = get_user_name(1).await;
+        assert!(result.name.is_empty() == false && result.last_name.is_empty() == false);
+    }
+
+    #[tokio::test]
+    async fn test_update_user() {
+        let user_to_update = UserToUpdate {
+            id: get_last_user_id().await,
+            name: "updatedtest".to_string(),
+            last_name: "updatedtest".to_string()
+        };
+
+        let result = update_user(user_to_update).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_delete_user() {
+        let result = delete_user(get_last_user_id().await).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_register_user_invalid() {
+        let user_to_insert = RegisterRequest {
+            email: "test@gmail.com".to_string(),
+            name: "test".to_string(),
+            last_name: "test".to_string(),
+            password: "test".to_string()
+        };
+        let result = register_user(user_to_insert).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_get_all_user_emails_invalid() {
+        let result = get_all_user_emails().await;
+        assert!(result.is_empty() == true);
+    }
+
+    #[tokio::test]
+    async fn test_update_password_invalid() {
+        let password_to_update = PasswordToUpdate {
+            email: "test@gmail.com".to_string(),
+            password: "updatedtest".to_string()
+        };
+
+        let result = update_password(password_to_update).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_get_user_name_invalid() {
+        let result = get_user_name(0).await;
+        assert!(result.name.is_empty() == false && result.last_name.is_empty() == false);
+    }
+
+    #[tokio::test]
+    async fn test_update_user_invalid() {
+        let user_to_update = UserToUpdate {
+            id: 0,
+            name: "updatedtest".to_string(),
+            last_name: "updatedtest".to_string()
+        };
+
+        let result = update_user(user_to_update).await;
+        assert!(result);
+    }
+
+    #[tokio::test]
+    async fn test_delete_user_invalid() {
+        let result = delete_user(0).await;
+        assert!(result);
+    }
 }
