@@ -3145,12 +3145,17 @@ version = "0.1.0"
 dependencies = [
  "actix-cors",
  "actix-web",
+ "actix-web-httpauth",
+ "auth",
  "chrono",
  "data_access",
+ "log",
  "mysql",
  "serde",
  "serde_json",
  "tokio",
+ "utoipa",
+ "utoipa-swagger-ui",
 ]
 
 [[package]]

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+auth = { path = "../auth" }
 data_access = { path = "../data_access" }
 actix-web = { workspace = true }
 actix-cors = { workspace = true }
@@ -12,3 +13,7 @@ serde_json = { workspace = true }
 mysql = { workspace = true }
 tokio = { workspace = true }
 chrono = { workspace = true }
+log = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
+actix-web-httpauth = { workspace = true }
