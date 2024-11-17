@@ -218,6 +218,8 @@ pub async fn get_creator_id(channel_id: u32) -> Option<u32> {
 
 #[cfg(test)]
 mod tests {
+    use std::result;
+
     use super::*;
     use tokio;
 
@@ -243,5 +245,29 @@ mod tests {
         let result = get_channels_created_by_user(100).await;
         let channels = result.unwrap();
         assert!(channels.is_empty() == true);
+    }
+
+    #[tokio::test]
+    async fn test_get_channel_name() {
+        let result = get_channel_name(1).await;
+        assert!(result.is_empty() == false);
+    }
+
+    #[tokio::test]
+    async fn test_get_creator_id() {
+        let result = get_creator_id(1).await;
+        assert!(result.unwrap() != 0);
+    }
+
+    #[tokio::test]
+    async fn test_get_channel_name_invalid() {
+        let result = get_channel_name(0).await;
+        assert!(result.is_empty() == false);
+    }
+
+    #[tokio::test]
+    async fn test_get_creator_id_incalid() {
+        let result = get_creator_id(0).await;
+        assert!(result.unwrap() != 0);
     }
 }
