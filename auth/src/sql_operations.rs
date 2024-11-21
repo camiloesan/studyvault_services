@@ -49,8 +49,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_login_success() {
-        let email = "juan@uv.mx".to_string();
-        let password = "ed08c290d7e22f7bb324b15cbadce35b0b348564fd2d5f95752388d86d71bcca".to_string();
+        let email = "lizrm@uv.mx".to_string();
+        let password = "123456".to_string();
         let result = login(email, password).await;
 
         assert!(result.is_some());
@@ -65,7 +65,7 @@ mod tests {
     #[tokio::test]
     async fn test_login_invalid_password() {
         let email = "juan@uv.mx".to_string();
-        let password = "ed08c290d7e22f7bb324b15".to_string();
+        let password = "123456".to_string();
         let result = login(email, password).await;
 
         assert!(result.is_none());
@@ -74,7 +74,7 @@ mod tests {
     #[tokio::test]
     async fn test_login_invalid_email() {
         let email = "margaritagh@uv.mx".to_string();
-        let password = "069fca009882e13e01c6b0559c9b14a4337c4495f83fd720965ec80f0770a699".to_string();
+        let password = "123456".to_string();
         let result = login(email, password).await;
 
         assert!(result.is_none());
