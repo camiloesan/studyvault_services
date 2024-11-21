@@ -248,6 +248,49 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_create_channel_success() {
+        let result = create_channel(2, "Test Channel".to_string(), "A test description".to_string(), 1).await;
+        assert!(result.unwrap(), "Failed to create channel");
+    }
+
+    #[tokio::test]
+    async fn test_create_channel_invalid_category() {
+        let result = create_channel(2, "Test Channel".to_string(), "A test description".to_string(), 9999).await;
+        assert!(result.is_err(), "Channel created with invalid category");
+    }
+
+    #[tokio::test]
+    async fn test_update_channel_success() {
+        let result = update_channel(2, "Updated Channel".to_string(), "Updated description".to_string(), 2).await;
+        assert!(result.unwrap(), "Failed to update channel");
+    }
+
+    #[tokio::test]
+    async fn test_update_channel_invalid_id() {
+        let result = update_channel(9999, "Updated Channel".to_string(), "Updated description".to_string(), 2).await;
+        assert!(!result.unwrap(), "Updated channel with invalid ID");
+    }
+
+    #[tokio::test]
+    async fn test_delete_channel_success() {
+        let result = delete_channel(1).await;
+        assert!(result.unwrap(), "Failed to delete channel");
+    }
+
+    #[tokio::test]
+    async fn test_delete_channel_invalid_id() {
+        let result = delete_channel(9999).await;
+        assert!(!result.unwrap(), "Deleted channel with invalid ID");
+    }
+
+    #[tokio::test]
+    async fn test_get_all_categories_not_empty() {
+        let result = get_all_categories().await;
+        let categories = result.unwrap();
+        assert!(!categories.is_empty(), "Categories list is empty");
+    }
+
+    #[tokio::test]
     async fn test_get_channel_name() {
         let result = get_channel_name(1).await;
         assert!(result.is_empty() == false);
