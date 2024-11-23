@@ -135,8 +135,6 @@ pub async fn update_channel(
         },
     )?;
 
-    let state = result.affected_rows() > 0;
-
     Ok(result.affected_rows() >= 0)
 }
 
