@@ -1,10 +1,10 @@
-mod controller;
-mod sql_operations;
 mod auth;
+mod controller;
 mod email_operations;
+mod sql_operations;
 
 use actix_cors::Cors;
-use actix_web::{web, App, HttpServer};
+use actix_web::{App, HttpServer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -16,18 +16,18 @@ async fn main() -> std::io::Result<()> {
             .allow_any_method()
             .allow_any_header();
 
-            #[derive(OpenApi)]
-            #[openapi(
-                paths(
-                    controller::login_user,
-                    controller::request_verification,
-                    controller::verify_code,
-                ),
-                components(schemas(auth::LoginData, auth::VerificationRequest))
-            )]
-            struct ApiDoc;
-    
-            let openapi = ApiDoc::openapi();
+        #[derive(OpenApi)]
+        #[openapi(
+            paths(
+                controller::login_user,
+                controller::request_verification,
+                controller::verify_code,
+            ),
+            components(schemas(auth::LoginData, auth::VerificationRequest))
+        )]
+        struct ApiDoc;
+
+        let openapi = ApiDoc::openapi();
 
         App::new()
             .wrap(cors)
