@@ -1,6 +1,6 @@
-use crate::user::{RegisterRequest, UserName, UserToUpdate, PasswordToUpdate};
+use crate::user::{PasswordToUpdate, RegisterRequest, UserName, UserToUpdate};
 use data_access;
-use mysql::{params, prelude::Queryable, Row, from_row};
+use mysql::{from_row, params, prelude::Queryable, Row};
 
 pub async fn register_user(request: RegisterRequest) -> bool {
     let user_type_id = if request.email.ends_with("@estudiantes.uv.mx") {
@@ -90,13 +90,17 @@ pub async fn get_user_name(user_id: u32) -> UserName {
     let query = "SELECT name, last_name FROM users WHERE user_id = :user_id";
 
     let result = conn
-        .exec_iter(query, params! {
-            "user_id" => user_id
-        })
+        .exec_iter(
+            query,
+            params! {
+                "user_id" => user_id
+            },
+        )
         .expect("Failed to execute query");
 
     for row in result {
-        let (name, last_name): (String, String) = from_row::<(String, String)>(row.expect("Row error"));
+        let (name, last_name): (String, String) =
+            from_row::<(String, String)>(row.expect("Row error"));
         return UserName { name, last_name };
     }
 
@@ -126,14 +130,12 @@ pub async fn update_password(request: PasswordToUpdate) -> bool {
 }
 
 //only for tests
-pub async fn get_last_user_id() -> u32 {
+pub async fn _get_last_user_id() -> u32 {
     let mut conn = data_access::get_connection();
 
     let query = "SELECT MAX(user_id) FROM users";
 
-    let result: Option<u32> = conn
-        .query_first(query)
-        .expect("Failed to execute query");
+    let result: Option<u32> = conn.query_first(query).expect("Failed to execute query");
 
     result.unwrap()
 }
@@ -149,7 +151,7 @@ mod tests {
             email: "test@uv.mx".to_string(),
             name: "test".to_string(),
             last_name: "test".to_string(),
-            password: "test".to_string()
+            password: "test".to_string(),
         };
         let result = register_user(user_to_insert).await;
         assert!(result);
@@ -165,7 +167,7 @@ mod tests {
     async fn test_update_password() {
         let password_to_update = PasswordToUpdate {
             email: "test@uv.mx".to_string(),
-            password: "updatedtest".to_string()
+            password: "updatedtest".to_string(),
         };
 
         let result = update_password(password_to_update).await;
@@ -181,9 +183,9 @@ mod tests {
     #[tokio::test]
     async fn test_update_user() {
         let user_to_update = UserToUpdate {
-            id: get_last_user_id().await,
+            id: _get_last_user_id().await,
             name: "updatedtest".to_string(),
-            last_name: "updatedtest".to_string()
+            last_name: "updatedtest".to_string(),
         };
 
         let result = update_user(user_to_update).await;
@@ -192,7 +194,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_delete_user() {
-        let result = delete_user(get_last_user_id().await).await;
+        let result = delete_user(_get_last_user_id().await).await;
         assert!(result);
     }
 
@@ -202,7 +204,7 @@ mod tests {
             email: "test@gmail.com".to_string(),
             name: "test".to_string(),
             last_name: "test".to_string(),
-            password: "test".to_string()
+            password: "test".to_string(),
         };
         let result = register_user(user_to_insert).await;
         assert!(result);
@@ -218,7 +220,7 @@ mod tests {
     async fn test_update_password_invalid() {
         let password_to_update = PasswordToUpdate {
             email: "test@gmail.com".to_string(),
-            password: "updatedtest".to_string()
+            password: "updatedtest".to_string(),
         };
 
         let result = update_password(password_to_update).await;
@@ -236,7 +238,7 @@ mod tests {
         let user_to_update = UserToUpdate {
             id: 0,
             name: "updatedtest".to_string(),
-            last_name: "updatedtest".to_string()
+            last_name: "updatedtest".to_string(),
         };
 
         let result = update_user(user_to_update).await;

@@ -1,4 +1,3 @@
-use actix_web::test::ok_service;
 use data_access;
 use mysql::{params, prelude::Queryable, Row};
 use serde::{Deserialize, Serialize};
@@ -102,16 +101,15 @@ pub async fn create_channel(
     let query = "INSERT INTO channels (creator_id, name, description, category_id)
         VALUES (:creator_id, :name, :description, :category_id)";
 
-    let result = conn
-        .exec_iter(
-            query,
-            params! {
-                "creator_id" => creator_id,
-                "name" => name,
-                "description" => description,
-                "category_id" => category_id,
-            },
-        )?;
+    let result = conn.exec_iter(
+        query,
+        params! {
+            "creator_id" => creator_id,
+            "name" => name,
+            "description" => description,
+            "category_id" => category_id,
+        },
+    )?;
 
     Ok(result.affected_rows() == 1)
 }
@@ -127,16 +125,15 @@ pub async fn update_channel(
         "UPDATE channels SET name = :name, description = :description, category_id = :category_id
         WHERE channel_id = :channel_id";
 
-    let result = conn
-        .exec_iter(
-            query,
-            params! {
-                "name" => name,
-                "description" => description,
-                "category_id" => category_id,
-                "channel_id" => channel_id,
-            },
-        )?;
+    let result = conn.exec_iter(
+        query,
+        params! {
+            "name" => name,
+            "description" => description,
+            "category_id" => category_id,
+            "channel_id" => channel_id,
+        },
+    )?;
 
     Ok(result.affected_rows() > 0)
 }
@@ -146,13 +143,12 @@ pub async fn delete_channel(channel_id: u32) -> Result<bool, mysql::Error> {
 
     let query = "DELETE FROM channels WHERE channel_id = :channel_id";
 
-    let result = conn
-        .exec_iter(
-            query,
-            params! {
-                "channel_id" => channel_id
-            },
-        )?;
+    let result = conn.exec_iter(
+        query,
+        params! {
+            "channel_id" => channel_id
+        },
+    )?;
 
     Ok(result.affected_rows() == 1)
 }
@@ -218,8 +214,6 @@ pub async fn get_creator_id(channel_id: u32) -> Option<u32> {
 
 #[cfg(test)]
 mod tests {
-    use std::result;
-
     use super::*;
     use tokio;
 
@@ -249,25 +243,49 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_channel_success() {
-        let result = create_channel(2, "Test Channel".to_string(), "A test description".to_string(), 1).await;
+        let result = create_channel(
+            2,
+            "Test Channel".to_string(),
+            "A test description".to_string(),
+            1,
+        )
+        .await;
         assert!(result.unwrap(), "Failed to create channel");
     }
 
     #[tokio::test]
     async fn test_create_channel_invalid_category() {
-        let result = create_channel(2, "Test Channel".to_string(), "A test description".to_string(), 9999).await;
+        let result = create_channel(
+            2,
+            "Test Channel".to_string(),
+            "A test description".to_string(),
+            9999,
+        )
+        .await;
         assert!(result.is_err(), "Channel created with invalid category");
     }
 
     #[tokio::test]
     async fn test_update_channel_success() {
-        let result = update_channel(2, "Updated Channel".to_string(), "Updated description".to_string(), 2).await;
+        let result = update_channel(
+            2,
+            "Updated Channel".to_string(),
+            "Updated description".to_string(),
+            2,
+        )
+        .await;
         assert!(result.unwrap(), "Failed to update channel");
     }
 
     #[tokio::test]
     async fn test_update_channel_invalid_id() {
-        let result = update_channel(9999, "Updated Channel".to_string(), "Updated description".to_string(), 2).await;
+        let result = update_channel(
+            9999,
+            "Updated Channel".to_string(),
+            "Updated description".to_string(),
+            2,
+        )
+        .await;
         assert!(!result.unwrap(), "Updated channel with invalid ID");
     }
 
