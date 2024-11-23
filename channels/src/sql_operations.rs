@@ -138,7 +138,7 @@ pub async fn update_channel(
             },
         )?;
 
-    Ok(result.affected_rows() >= 0)
+    Ok(result.affected_rows() > 0)
 }
 
 pub async fn delete_channel(channel_id: u32) -> Result<bool, mysql::Error> {
