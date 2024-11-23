@@ -3,7 +3,7 @@ mod sql_operations;
 mod user;
 
 use actix_cors::Cors;
-use actix_web::{web, App, HttpServer};
+use actix_web::{App, HttpServer};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use auth::validate_jwt;
 use utoipa::OpenApi;
@@ -27,7 +27,12 @@ async fn main() -> std::io::Result<()> {
                 controller::get_user_name_by_id,
                 controller::update_user_password,
             ),
-            components(schemas(user::UserName, user::RegisterRequest, user::UserToUpdate, user::PasswordToUpdate))
+            components(schemas(
+                user::UserName,
+                user::RegisterRequest,
+                user::UserToUpdate,
+                user::PasswordToUpdate
+            ))
         )]
         struct ApiDoc;
 

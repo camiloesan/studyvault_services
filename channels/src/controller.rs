@@ -1,5 +1,3 @@
-use std::result;
-
 use crate::channel;
 use crate::channel::ChannelUpdateData;
 use crate::sql_operations;
