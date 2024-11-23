@@ -6,7 +6,7 @@ use crate::posts::{
 };
 use crate::sql_operations;
 use async_stream::try_stream;
-use futures_util::Stream;
+use futures_util::{Stream, StreamExt};
 use log::{error, info};
 use std::pin::Pin;
 use tokio::fs::File;
@@ -34,17 +34,16 @@ impl PostsService for PostsServicesStruct {
         let mut description = None;
         let mut file = None;
 
-        while let Some(file_chunk) = stream.message().await? {
+        while let Some(file_chunk) = stream.next().await {
+            let file_chunk = file_chunk?;
+
             if channel_id.is_none() {
                 channel_id = Some(file_chunk.channel_id);
                 file_name = Some(file_chunk.filename);
                 title = Some(file_chunk.title);
                 description = Some(file_chunk.description);
 
-                let channel_path = format!(
-                    "/Users/camiloespejo/Documents/data/files/{}",
-                    channel_id.as_ref().unwrap()
-                );
+                let channel_path = format!("/data/files/{}", channel_id.as_ref().unwrap());
                 tokio::fs::create_dir_all(&channel_path)
                     .await
                     .map_err(|e| {
