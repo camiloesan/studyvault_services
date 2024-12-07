@@ -1,4 +1,3 @@
-use data_access;
 use mysql::{params, prelude::Queryable, Row};
 use serde::{Deserialize, Serialize};
 
@@ -20,7 +19,7 @@ pub async fn get_all_channels() -> Result<Vec<Channel>, mysql::Error> {
         FROM channels INNER JOIN users ON channels.creator_id = users.user_id
         INNER JOIN categories ON channels.category_id = categories.category_id";
     let mut channels: Vec<Channel> = Vec::new();
-    conn.query_map(&query, |mut row: Row| {
+    conn.query_map(query, |mut row: Row| {
         let channel = Channel {
             channel_id: row.take("channel_id").unwrap(),
             creator_id: row.take("creator_id").unwrap(),
@@ -46,7 +45,7 @@ pub async fn get_subscriptions_by_user(user_id: u32) -> Result<Vec<Channel>, mys
         WHERE channels.channel_id IN (SELECT channel_id FROM subscriptions WHERE user_id = :user_id)";
     let mut channels: Vec<Channel> = Vec::new();
 
-    conn.exec_map(&query, params! { "user_id" => user_id }, |mut row: Row| {
+    conn.exec_map(query, params! { "user_id" => user_id }, |mut row: Row| {
         let channel = Channel {
             channel_id: row.take("channel_id").unwrap(),
             creator_id: row.take("creator_id").unwrap(),
@@ -72,7 +71,7 @@ pub async fn get_channels_created_by_user(user_id: u32) -> Result<Vec<Channel>, 
 
     let mut channels: Vec<Channel> = Vec::new();
     conn.exec_map(
-        &query,
+        query,
         params! { "creator_id" => user_id },
         |mut row: Row| {
             let channel = Channel {
@@ -164,7 +163,7 @@ pub async fn get_all_categories() -> Result<Vec<Category>, mysql::Error> {
     let query = "SELECT category_id, name FROM categories";
     let mut categories: Vec<Category> = Vec::new();
 
-    conn.query_map(&query, |mut row: Row| {
+    conn.query_map(query, |mut row: Row| {
         let category = Category {
             category_id: row.take("category_id").unwrap(),
             name: row.take("name").unwrap(),
@@ -215,13 +214,12 @@ pub async fn get_creator_id(channel_id: u32) -> Option<u32> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio;
 
     #[tokio::test]
     async fn test_get_channels() {
         let result = get_all_channels().await;
         let channels = result.unwrap();
-        assert!(channels.is_empty() == false);
+        assert!(!channels.is_empty());
     }
 
     #[tokio::test]
@@ -230,7 +228,7 @@ mod tests {
         let result = get_channels_created_by_user(2).await;
         let channels = result.unwrap();
         println!("Channels count: {}", channels.len());
-        assert!(channels.is_empty() == false);
+        assert!(!channels.is_empty());
     }
 
     #[tokio::test]
@@ -238,7 +236,7 @@ mod tests {
         // do pre and post
         let result = get_channels_created_by_user(100).await;
         let channels = result.unwrap();
-        assert!(channels.is_empty() == true);
+        assert!(channels.is_empty());
     }
 
     #[tokio::test]
@@ -311,7 +309,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_channel_name() {
         let result = get_channel_name(1).await;
-        assert!(result.is_empty() == false);
+        assert!(!result.is_empty());
     }
 
     #[tokio::test]
@@ -323,7 +321,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_channel_name_invalid() {
         let result = get_channel_name(0).await;
-        assert!(result.is_empty() == false);
+        assert!(!result.is_empty());
     }
 
     #[tokio::test]

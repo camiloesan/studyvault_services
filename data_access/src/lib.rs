@@ -9,7 +9,7 @@ pub fn get_connection() -> PooledConn {
 }
 
 pub fn get_connection_safe() -> Result<PooledConn, mysql::Error> {
-    let url = "mysql://root:123456@mysql:3306/study_vault";
+    let url = "mysql://root:123456@localhost:6609/study_vault";
     let pool = Pool::new(url)?;
     let conn = pool.get_conn()?;
     Ok(conn)

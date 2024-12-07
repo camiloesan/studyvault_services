@@ -1,4 +1,3 @@
-use data_access;
 use mysql::{params, prelude::Queryable, Row};
 use serde::{Deserialize, Serialize};
 
@@ -19,7 +18,7 @@ pub async fn login(email: String, password: String) -> Option<User> {
         FROM users
         WHERE email = :email AND password = :password";
 
-        let row: Option<Row> = conn
+    let row: Option<Row> = conn
         .exec_first(query, params! { "email" => email, "password" => password })
         .ok()?;
 
@@ -38,14 +37,13 @@ pub async fn login(email: String, password: String) -> Option<User> {
             email,
         });
     }
-    
+
     None
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio;
 
     #[tokio::test]
     async fn test_login_success() {
