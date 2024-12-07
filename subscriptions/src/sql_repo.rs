@@ -32,7 +32,7 @@ impl SubscriptionsRepository for MySQLSubscriptionsRepository {
         let query =
             "INSERT INTO subscriptions (user_id, channel_id) VALUES (:user_id, :channel_id)";
         let result = conn.exec_iter(
-            &query,
+            query,
             params! {
                 "user_id" => subscription.user_id,
                 "channel_id" => subscription.channel_id,
@@ -50,7 +50,7 @@ impl SubscriptionsRepository for MySQLSubscriptionsRepository {
         let query =
             "DELETE FROM subscriptions WHERE user_id = :user_id AND channel_id = :channel_id";
         let result = conn.exec_iter(
-            &query,
+            query,
             params! {
                 "user_id" => subscription.user_id,
                 "channel_id" => subscription.channel_id,
@@ -64,7 +64,6 @@ impl SubscriptionsRepository for MySQLSubscriptionsRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio;
     const URL: &str = "mysql://root:123456@127.0.0.1:6609/study_vault";
 
     #[tokio::test]
@@ -76,7 +75,7 @@ mod tests {
         };
         let result = repo.subscribe(subscription.clone()).await;
         let _ = repo.unsubscribe(subscription).await;
-        assert_eq!(result.unwrap(), true);
+        assert!(result.unwrap());
     }
 
     #[tokio::test]
@@ -88,6 +87,6 @@ mod tests {
         };
         let _ = repo.subscribe(subscription.clone()).await;
         let result = repo.unsubscribe(subscription).await;
-        assert_eq!(result.unwrap(), true);
+        assert!(result.unwrap());
     }
 }

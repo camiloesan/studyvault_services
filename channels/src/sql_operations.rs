@@ -175,7 +175,7 @@ pub async fn get_all_categories() -> Result<Vec<Category>, mysql::Error> {
 }
 
 pub async fn get_channel_name(channel_id: u32) -> String {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe().expect("could not get connection");
 
     let query = "SELECT name FROM channels WHERE channel_id = :channel_id";
 
@@ -195,7 +195,7 @@ pub async fn get_channel_name(channel_id: u32) -> String {
 }
 
 pub async fn get_creator_id(channel_id: u32) -> Option<u32> {
-    let mut conn = data_access::get_connection();
+    let mut conn = data_access::get_connection_safe().expect("could not get connection");
 
     let query = "SELECT creator_id FROM channels WHERE channel_id = :channel_id";
 

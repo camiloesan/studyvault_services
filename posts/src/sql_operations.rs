@@ -1,6 +1,5 @@
 use crate::post::Post;
 use actix_web::cookie::time::Date;
-use data_access;
 use mysql::{params, prelude::Queryable, Row};
 
 pub async fn get_posts_by_channel_id(channel_id: u32) -> Result<Vec<Post>, mysql::Error> {
@@ -10,7 +9,7 @@ pub async fn get_posts_by_channel_id(channel_id: u32) -> Result<Vec<Post>, mysql
     let mut posts: Vec<Post> = Vec::new();
 
     conn.exec_map(
-        &query,
+        query,
         params! { "channel_id" => channel_id },
         |mut row: Row| {
             let pdate: Date = row.take("publish_date").unwrap();
@@ -104,7 +103,7 @@ pub async fn get_file_name(uuid: String) -> Result<String, mysql::Error> {
 
     let mut result: String = Default::default();
 
-    conn.exec_map(&query, params! { "file_id" => uuid }, |mut row: Row| {
+    conn.exec_map(query, params! { "file_id" => uuid }, |mut row: Row| {
         result = row.take("name").unwrap()
     })?;
 
@@ -114,7 +113,6 @@ pub async fn get_file_name(uuid: String) -> Result<String, mysql::Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio;
     use uuid::Uuid;
 
     #[tokio::test]
@@ -129,7 +127,7 @@ mod tests {
 
         let result = get_posts_by_channel_id(1).await;
         let posts = result.unwrap();
-        assert_eq!(posts.len() > 0, true);
+        assert!(!posts.is_empty());
 
         // post
         let _ = _delete_post_by_file_uuid(uuid).await;
@@ -144,7 +142,7 @@ mod tests {
         let uuid = Uuid::new_v4().to_string();
         let result = create_post(uuid.clone(), channel_id, file_name, title, description).await;
 
-        assert_eq!(result.unwrap(), true);
+        assert!(result.unwrap());
 
         // post
         let _ = _delete_post_by_file_uuid(uuid).await;

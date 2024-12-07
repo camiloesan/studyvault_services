@@ -1,5 +1,4 @@
 use crate::user::{PasswordToUpdate, RegisterRequest, UserName, UserToUpdate};
-use data_access;
 use mysql::{from_row, params, prelude::Queryable, Row};
 
 pub async fn register_user(request: RegisterRequest) -> bool {
@@ -37,7 +36,7 @@ pub async fn get_all_user_emails() -> Vec<String> {
     let query = "SELECT email FROM users";
     let mut emails: Vec<String> = Vec::new();
 
-    conn.query_map(&query, |mut row: Row| {
+    conn.query_map(query, |mut row: Row| {
         let email: String = row.take("email").unwrap();
         emails.push(email);
     })
@@ -89,7 +88,7 @@ pub async fn get_user_name(user_id: u32) -> UserName {
 
     let query = "SELECT name, last_name FROM users WHERE user_id = :user_id";
 
-    let result = conn
+    let mut result = conn
         .exec_iter(
             query,
             params! {
@@ -98,7 +97,7 @@ pub async fn get_user_name(user_id: u32) -> UserName {
         )
         .expect("Failed to execute query");
 
-    for row in result {
+    if let Some(row) = result.next() {
         let (name, last_name): (String, String) =
             from_row::<(String, String)>(row.expect("Row error"));
         return UserName { name, last_name };
@@ -143,7 +142,6 @@ pub async fn _get_last_user_id() -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio;
 
     #[tokio::test]
     async fn test_register_user() {
@@ -160,7 +158,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_all_user_emails() {
         let result = get_all_user_emails().await;
-        assert!(result.is_empty() == false);
+        assert!(!result.is_empty());
     }
 
     #[tokio::test]
@@ -177,7 +175,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_user_name() {
         let result = get_user_name(1).await;
-        assert!(result.name.is_empty() == false && result.last_name.is_empty() == false);
+        assert!(!result.name.is_empty() && !result.last_name.is_empty());
     }
 
     #[tokio::test]
@@ -213,7 +211,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_all_user_emails_invalid() {
         let result = get_all_user_emails().await;
-        assert!(result.is_empty() == true);
+        assert!(result.is_empty());
     }
 
     #[tokio::test]
@@ -230,7 +228,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_user_name_invalid() {
         let result = get_user_name(0).await;
-        assert!(result.name.is_empty() == false && result.last_name.is_empty() == false);
+        assert!(!result.name.is_empty() && !result.last_name.is_empty());
     }
 
     #[tokio::test]

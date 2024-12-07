@@ -70,7 +70,7 @@ impl PostsService for PostsServicesStruct {
 
         let sql_result = sql_operations::create_post(
             uuid.clone(),
-            channel_id.clone().unwrap(),
+            channel_id.unwrap(),
             file_name.clone().unwrap(),
             title.unwrap(),
             description.unwrap(),

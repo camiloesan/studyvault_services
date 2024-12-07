@@ -1,5 +1,4 @@
 use crate::comment::{Comment, CommentToInsert, CommentToUpdate};
-use data_access;
 use mysql::{params, prelude::Queryable, Row, Value};
 
 pub async fn comment(request: CommentToInsert) -> bool {
@@ -105,7 +104,6 @@ pub async fn _get_last_comment_id() -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio;
 
     #[tokio::test]
     async fn test_comment() {
@@ -122,7 +120,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_all_comments() {
         let result = get_all_comments(1).await;
-        assert!(result.is_empty() == false);
+        assert!(!result.is_empty());
     }
 
     #[tokio::test]
@@ -158,7 +156,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_all_comments_invalid() {
         let result = get_all_comments(0).await;
-        assert!(result.is_empty() == false);
+        assert!(!result.is_empty());
     }
 
     #[tokio::test]

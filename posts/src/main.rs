@@ -15,7 +15,7 @@ pub mod posts {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     let addr = "0.0.0.0:8081".parse()?;
-    let file_service = PostsServicesStruct::default();
+    let file_service = PostsServicesStruct;
     info!("gRPC Server listening on {}", addr);
     Server::builder()
         .add_service(PostsServiceServer::new(file_service))
