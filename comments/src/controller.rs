@@ -1,5 +1,5 @@
-use crate::{comment::CommentToUpdate, sql_operations};
 use crate::comment::CommentToInsert;
+use crate::{comment::CommentToUpdate, sql_operations};
 use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use log::error;
 
@@ -73,4 +73,11 @@ pub async fn delete_existing_comment(path: web::Path<u32>) -> impl Responder {
             HttpResponse::InternalServerError().finish()
         }
     }
+}
+
+/// Retrieve the average rating for a post.
+#[get("/rating/{id}")]
+pub async fn get_avg_rating(path: web::Path<u32>) -> impl Responder {
+    let post_id = path.into_inner();
+    HttpResponse::Ok().json(sql_operations::get_avg_rating(post_id).await)
 }

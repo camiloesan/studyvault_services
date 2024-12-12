@@ -1,13 +1,13 @@
-mod sql_operations;
 mod comment;
 mod controller;
+mod sql_operations;
 
 use actix_cors::Cors;
 use actix_web::{App, HttpServer};
 use actix_web_httpauth::middleware::HttpAuthentication;
+use auth::validate_jwt;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-use auth::validate_jwt;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -25,7 +25,11 @@ async fn main() -> std::io::Result<()> {
                 controller::update_existing_comment,
                 controller::delete_existing_comment,
             ),
-            components(schemas(comment::CommentToInsert, comment::Comment, comment::CommentToUpdate))
+            components(schemas(
+                comment::CommentToInsert,
+                comment::Comment,
+                comment::CommentToUpdate
+            ))
         )]
         struct ApiDoc;
 
@@ -41,6 +45,7 @@ async fn main() -> std::io::Result<()> {
             .service(controller::get_all_comments_by_post_id)
             .service(controller::update_existing_comment)
             .service(controller::delete_existing_comment)
+            .service(controller::get_avg_rating)
     })
     .bind("0.0.0.0:8084")?
     .run()

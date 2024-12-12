@@ -1,6 +1,18 @@
 use crate::comment::{Comment, CommentToInsert, CommentToUpdate};
 use mysql::{params, prelude::Queryable, Row, Value};
 
+pub async fn get_avg_rating(post_id: u32) -> f32 {
+    let mut conn = data_access::get_connection();
+
+    let query = "SELECT AVG(rating) FROM comments WHERE post_id = :post_id";
+
+    let result = conn
+        .exec(query, params! { "post_id" => post_id })
+        .expect("wrong");
+
+    result.into_iter().next().unwrap()
+}
+
 pub async fn comment(request: CommentToInsert) -> bool {
     let mut conn = data_access::get_connection();
 
@@ -104,6 +116,13 @@ pub async fn _get_last_comment_id() -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn test_get_avg_rating() {
+        let result = get_avg_rating(1).await;
+        println!("Result: {}", result);
+        assert!(result > 0.0);
+    }
 
     #[tokio::test]
     async fn test_comment() {
