@@ -1,2 +1,4 @@
 /target
 /auth/.env
+/.cargo/.config.toml
+.DS_Store

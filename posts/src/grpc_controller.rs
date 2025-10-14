@@ -43,7 +43,12 @@ impl PostsService for PostsServicesStruct {
                 title = Some(file_chunk.title);
                 description = Some(file_chunk.description);
 
-                let channel_path = format!("/data/files/{}", channel_id.as_ref().unwrap());
+                let channel_path = format!(
+                    "{}/{}",
+                    std::env::var("FILE_DIR")
+                        .expect("Couldn't get file directory from cargo environment"),
+                    channel_id.as_ref().unwrap()
+                );
                 tokio::fs::create_dir_all(&channel_path)
                     .await
                     .map_err(|e| {
@@ -163,7 +168,13 @@ impl PostsService for PostsServicesStruct {
 
         let extension = file_name.split('.').last().unwrap_or("");
 
-        let file_path = format!("/data/files/{}/{}.{}", channel_id, file_id, extension);
+        let file_path = format!(
+            "{}/{}/{}.{}",
+            std::env::var("FILE_DIR").expect("Couldn't get file directory from cargo env"),
+            channel_id,
+            file_id,
+            extension
+        );
 
         let mut file = File::open(&file_path).await.map_err(|e| {
             error!("Failed to open file: {:?}", e);

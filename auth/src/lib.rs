@@ -16,7 +16,8 @@ pub struct Claims {
 
 pub fn generate_jwt(user_id: i32) -> Result<String, jsonwebtoken::errors::Error> {
     dotenv().ok();
-    let secret_key = std::env::var("SECRET_KEY").expect("SECRET_KEY not in .env");
+    let secret_key =
+        std::env::var("SECRET_KEY").expect("Couldn't get secret key from cargo environment");
 
     let expiration = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -42,7 +43,8 @@ pub async fn validate_jwt(
 ) -> Result<ServiceRequest, Error> {
     dotenv().ok();
 
-    let secret_key = std::env::var("SECRET_KEY").expect("SECRET_KEY not in .env");
+    let secret_key =
+        std::env::var("SECRET_KEY").expect("Couldn't get secret key from cargo environment");
 
     let token = credentials.token();
 

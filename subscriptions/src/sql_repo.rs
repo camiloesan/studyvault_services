@@ -64,7 +64,7 @@ impl SubscriptionsRepository for MySQLSubscriptionsRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
-    const URL: &str = "mysql://root:123456@127.0.0.1:6609/study_vault";
+    const URL: &str = "mysql://sv_user:123456@127.0.0.1:3306/study_vault";
 
     #[tokio::test]
     async fn test_subscribe_to_channel_repo() {

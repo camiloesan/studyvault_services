@@ -1,16 +1,17 @@
-use mysql::{Pool, PooledConn};
+use mysql::{Opts, Pool, PooledConn};
 
 pub fn get_connection() -> PooledConn {
-    let url = "mysql://root:123456@mysql:3306/study_vault";
-    // let url = "mysql://root:123456@127.0.0.1:6609/study_vault";
-    let pool = Pool::new(url).expect("Failed to create pool");
+    let url =
+        std::env::var("DATABASE_URL").expect("Couldn't get secret key from cargo environment");
+    let pool = Pool::new(Opts::from_url(&url).unwrap()).expect("Failed to create pool");
 
     pool.get_conn().expect("Failed to get connection")
 }
 
 pub fn get_connection_safe() -> Result<PooledConn, mysql::Error> {
-    let url = "mysql://root:123456@mysql:3306/study_vault";
-    let pool = Pool::new(url)?;
+    let url =
+        std::env::var("DATABASE_URL").expect("Couldn't get secret key from cargo environment");
+    let pool = Pool::new(Opts::from_url(&url).unwrap())?;
     let conn = pool.get_conn()?;
     Ok(conn)
 }

@@ -13,8 +13,9 @@ use utoipa_swagger_ui::SwaggerUi;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let url = "mysql://root:123456@mysql:3306/study_vault";
-    let repo: MySQLSubscriptionsRepository = MySQLSubscriptionsRepository::new(url);
+    let url =
+        std::env::var("DATABASE_URL").expect("Couldn't get secret key from cargo environment");
+    let repo: MySQLSubscriptionsRepository = MySQLSubscriptionsRepository::new(&url);
 
     HttpServer::new(move || {
         let cors = Cors::default()
